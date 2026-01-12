@@ -145,7 +145,7 @@ export default function Home() {
       <div className="relative w-full h-screen bg-black overflow-hidden">
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
           <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
-            BETA 1.0
+            BETA 1.1
           </div>
         </div>
 
