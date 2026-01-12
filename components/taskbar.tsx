@@ -313,7 +313,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
               </ul>
             </div>
             <div className="border-t border-white/10 pt-3 text-xs text-white/60">
-              <p>Versión 1.0.0</p>
+              <p>Versión 1.1.0</p>
               <p className="mt-1">© 2025 EjemplOS. Todos los derechos reservados.</p>
             </div>
           </div>
