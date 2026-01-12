@@ -7,7 +7,7 @@ import type { LucideIcon } from "lucide-react"
 interface DesktopIconProps {
   icon: LucideIcon | React.ComponentType<{ className?: string }>
   label: string
-  onDoubleClick: () => void
+  onDoubleClick?: () => void
   initialPosition: { x: number; y: number }
   onPositionChange: (position: { x: number; y: number }) => void
   selected?: boolean

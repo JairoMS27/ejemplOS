@@ -8,20 +8,22 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu"
-import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette } from "lucide-react"
+import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings } from "lucide-react"
 import { DesktopIcon } from "./desktop-icon"
 
 interface DesktopProps {
   onOpenGamesFolder?: () => void
   onOpenApp?: (appType: "browser" | "paint", url?: string) => void
+  onOpenSettings?: () => void
 }
 
-export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
+export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: DesktopProps) {
   const [iconPositions, setIconPositions] = useState({
     portfolio: { x: 50, y: 50 },
     twitter: { x: 50, y: 160 },
     games: { x: 50, y: 270 },
     paint: { x: 50, y: 380 },
+    settings: { x: 50, y: 490 },
   })
 
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
@@ -38,7 +40,7 @@ export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
     window.location.href = "https://twitter.com/ej3mplo"
   }
 
-  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "paint", position: { x: number; y: number }) => {
+  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "paint" | "settings", position: { x: number; y: number }) => {
     setIconPositions((prev) => ({
       ...prev,
       [icon]: position,
@@ -68,7 +70,7 @@ export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
         />
 
         <DesktopIcon
-          icon={({ className }) => (
+          icon={({ className }: { className?: string }) => (
             <svg className={className} viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
@@ -109,6 +111,19 @@ export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
             setSelectedIcon("paint")
           }}
         />
+
+        <DesktopIcon
+          icon={Settings}
+          label="Ajustes"
+          onDoubleClick={onOpenSettings}
+          initialPosition={iconPositions.settings}
+          onPositionChange={(pos) => updateIconPosition("settings", pos)}
+          selected={selectedIcon === "settings"}
+          onClick={(e) => {
+            e.stopPropagation()
+            setSelectedIcon("settings")
+          }}
+        />
       </ContextMenuTrigger>
       <ContextMenuContent className="w-56 bg-black border-white/20 text-white">
         <ContextMenuItem onClick={handleRefresh} className="focus:bg-white/10 cursor-pointer">
@@ -116,9 +131,9 @@ export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
           <span>Actualizar</span>
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/20" />
-        <ContextMenuItem disabled className="opacity-50">
+        <ContextMenuItem onClick={onOpenSettings} className="focus:bg-white/10 cursor-pointer">
           <Monitor className="mr-2 h-4 w-4" />
-          <span>Configuración de pantalla</span>
+          <span>Configuracion de pantalla</span>
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

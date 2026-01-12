@@ -9,10 +9,11 @@ import { Game2048 } from "./apps/game-2048"
 import { Window } from "./window"
 import { PaintWindow } from "./apps/paint-window"
 import { SnakeWindow } from "./apps/snake-window"
+import { SettingsWindow } from "./apps/settings-window"
 
 interface OpenWindow {
   id: string
-  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "tetris" | "2048" | "paint" | "snake"
+  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "tetris" | "2048" | "paint" | "snake" | "settings"
   title: string
   zIndex: number
   fileName?: string
@@ -103,6 +104,7 @@ export function WindowManager({
           )}
           {window.type === "tetris" && <TetrisWindow />}
           {window.type === "2048" && <Game2048 />}
+          {window.type === "settings" && <SettingsWindow isMaximized={window.isMaximized} />}
         </Window>
       ))}
     </>

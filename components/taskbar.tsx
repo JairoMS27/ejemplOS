@@ -15,11 +15,12 @@ import {
   VolumeX,
   Music,
   Palette,
+  Settings,
 } from "lucide-react"
 import { useAudio } from "@/lib/audio-context"
 
 interface TaskBarProps {
-  onAppClick: (app: "browser" | "games" | "finder" | "paint") => void
+  onAppClick: (app: "browser" | "games" | "finder" | "paint" | "settings") => void
   minimizedWindows?: Array<{ id: string; title: string }>
   onRestoreWindow?: (id: string) => void
 }
@@ -67,6 +68,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
     { id: "finder", icon: Folder, label: "Finder", type: "finder" as const },
     { id: "paint", icon: Palette, label: "Paint", type: "paint" as const },
     { id: "games", icon: Gamepad2, label: "Juegos", type: "games" as const },
+    { id: "settings", icon: Settings, label: "Ajustes", type: "settings" as const },
   ]
 
   const formatTime = (time: number) => {
