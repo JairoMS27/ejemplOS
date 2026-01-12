@@ -7,14 +7,81 @@ import { WindowManager } from "@/components/window-manager"
 import { BootScreen } from "@/components/boot-screen"
 import { ChangelogModal } from "@/components/changelog-modal"
 import { AudioProvider } from "@/lib/audio-context"
+import { SettingsProvider, useSettings } from "@/lib/settings-context"
 
-export default function Home() {
+function DesktopBackground() {
+  const { settings } = useSettings()
+
+  // Render wallpaper based on settings
+  const renderWallpaper = () => {
+    switch (settings.wallpaper.type) {
+      case "solid":
+        return (
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: settings.wallpaper.color || "#000000" }}
+          />
+        )
+      case "image":
+        return settings.wallpaper.imageUrl ? (
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url(${settings.wallpaper.imageUrl})`,
+              backgroundSize: settings.wallpaper.imageFit || "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-black" />
+        )
+      default:
+        return <div className="absolute inset-0 bg-black" />
+    }
+  }
+
+  return (
+    <div className="absolute inset-0">
+      {renderWallpaper()}
+
+      {/* Grid overlay */}
+      {settings.desktop.showGrid && (
+        <div
+          className="absolute inset-0"
+          style={{
+            opacity: settings.desktop.gridOpacity / 100,
+            backgroundImage: `
+              linear-gradient(white 1px, transparent 1px),
+              linear-gradient(90deg, white 1px, transparent 1px)
+            `,
+            backgroundSize: `${settings.desktop.gridSize}px ${settings.desktop.gridSize}px`,
+          }}
+        />
+      )}
+
+      {/* Watermark */}
+      {settings.desktop.showWatermark && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <h1
+            className="text-[20rem] font-bold text-white select-none"
+            style={{ opacity: settings.desktop.watermarkOpacity / 100 }}
+          >
+            EJ
+          </h1>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function HomeContent() {
   const [booted, setBooted] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [openWindows, setOpenWindows] = useState<
     Array<{
       id: string
-      type: "browser" | "minesweeper" | "finder" | "games" | "tetris" | "2048" | "paint" | "snake"
+      type: "browser" | "minesweeper" | "finder" | "games" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file"
       title: string
       zIndex: number
       fileName?: string
@@ -38,7 +105,7 @@ export default function Home() {
   }, [])
 
   const openApplication = (
-    type: "browser" | "minesweeper" | "finder" | "games" | "tetris" | "2048" | "paint" | "snake",
+    type: "browser" | "minesweeper" | "finder" | "games" | "tetris" | "2048" | "paint" | "snake" | "settings",
     initialUrl?: string,
   ) => {
     const newWindow = {
@@ -59,7 +126,9 @@ export default function Home() {
                     ? "2048"
                     : type === "paint"
                       ? "Paint"
-                      : "Snake",
+                      : type === "settings"
+                        ? "Ajustes"
+                        : "Snake",
       zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
       initialUrl: initialUrl,
       isMaximized: false,
@@ -73,7 +142,9 @@ export default function Home() {
               ? { width: 700, height: 600 }
               : type === "paint"
                 ? { width: 900, height: 700 }
-                : { width: 900, height: 600 },
+                : type === "settings"
+                  ? { width: 800, height: 600 }
+                  : { width: 900, height: 600 },
       savedPosition: { x: 100 + openWindows.length * 30, y: 100 + openWindows.length * 30 },
     }
     setOpenWindows([...openWindows, newWindow])
@@ -141,62 +212,52 @@ export default function Home() {
   }
 
   return (
-    <AudioProvider>
-      <div className="relative w-full h-screen bg-black overflow-hidden">
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
-          <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
-            BETA 1.1
-          </div>
+    <div className="relative w-full h-screen bg-black overflow-hidden">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
+        <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
+          BETA 1.1
         </div>
-
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-black" />
-
-          {/* Cuadrícula de fondo */}
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `
-                linear-gradient(white 1px, transparent 1px),
-                linear-gradient(90deg, white 1px, transparent 1px)
-              `,
-              backgroundSize: "50px 50px",
-            }}
-          />
-
-          {/* Letras EJ en el centro */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <h1 className="text-[20rem] font-bold text-white opacity-20 select-none">EJ</h1>
-          </div>
-        </div>
-
-        {/* Main content */}
-        <div className="relative z-10 w-full h-full flex flex-col">
-          {/* Desktop area */}
-          <div className="flex-1 overflow-hidden relative">
-            <Desktop onOpenGamesFolder={openGamesFolder} onOpenApp={openApp} />
-
-            {/* Windows */}
-            <WindowManager
-              windows={openWindows}
-              onClose={closeWindow}
-              onFocus={focusWindow}
-              onOpenFile={openFile}
-              onOpenGame={openGame}
-              onOpenApp={openApp}
-              onMinimize={minimizeWindow}
-              onMaximize={maximizeWindow}
-              onSizeChange={updateWindowSize}
-              onPositionChange={updateWindowPosition}
-            />
-          </div>
-
-          {/* TaskBar area */}
-          <TaskBar onAppClick={openApplication} minimizedWindows={minimizedWindows} onRestoreWindow={minimizeWindow} />
-        </div>
-
-        {showChangelog && <ChangelogModal onClose={() => setShowChangelog(false)} />}
       </div>
-    </AudioProvider>
+
+      {/* Dynamic Desktop Background */}
+      <DesktopBackground />
+
+      {/* Main content */}
+      <div className="relative z-10 w-full h-full flex flex-col">
+        {/* Desktop area */}
+        <div className="flex-1 overflow-hidden relative">
+          <Desktop onOpenGamesFolder={openGamesFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} />
+
+          {/* Windows */}
+          <WindowManager
+            windows={openWindows}
+            onClose={closeWindow}
+            onFocus={focusWindow}
+            onOpenFile={openFile}
+            onOpenGame={openGame}
+            onOpenApp={openApp}
+            onMinimize={minimizeWindow}
+            onMaximize={maximizeWindow}
+            onSizeChange={updateWindowSize}
+            onPositionChange={updateWindowPosition}
+          />
+        </div>
+
+        {/* TaskBar area */}
+        <TaskBar onAppClick={openApplication} minimizedWindows={minimizedWindows} onRestoreWindow={minimizeWindow} />
+      </div>
+
+      {showChangelog && <ChangelogModal onClose={() => setShowChangelog(false)} />}
+    </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <SettingsProvider>
+      <AudioProvider>
+        <HomeContent />
+      </AudioProvider>
+    </SettingsProvider>
   )
 }
