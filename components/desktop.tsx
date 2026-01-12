@@ -8,7 +8,7 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu"
-import { RefreshCw, Monitor, DoorOpen, Gamepad2 } from "lucide-react"
+import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette } from "lucide-react"
 import { DesktopIcon } from "./desktop-icon"
 
 interface DesktopProps {
@@ -21,6 +21,7 @@ export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
     portfolio: { x: 50, y: 50 },
     twitter: { x: 50, y: 160 },
     games: { x: 50, y: 270 },
+    paint: { x: 50, y: 380 },
   })
 
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
@@ -37,7 +38,7 @@ export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
     window.location.href = "https://twitter.com/ej3mplo"
   }
 
-  const updateIconPosition = (icon: "portfolio" | "twitter" | "games", position: { x: number; y: number }) => {
+  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "paint", position: { x: number; y: number }) => {
     setIconPositions((prev) => ({
       ...prev,
       [icon]: position,
@@ -93,6 +94,19 @@ export function Desktop({ onOpenGamesFolder, onOpenApp }: DesktopProps) {
           onClick={(e) => {
             e.stopPropagation()
             setSelectedIcon("games")
+          }}
+        />
+
+        <DesktopIcon
+          icon={Palette}
+          label="Paint"
+          onDoubleClick={() => onOpenApp?.("paint")}
+          initialPosition={iconPositions.paint}
+          onPositionChange={(pos) => updateIconPosition("paint", pos)}
+          selected={selectedIcon === "paint"}
+          onClick={(e) => {
+            e.stopPropagation()
+            setSelectedIcon("paint")
           }}
         />
       </ContextMenuTrigger>

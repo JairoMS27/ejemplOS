@@ -14,11 +14,12 @@ import {
   Volume2,
   VolumeX,
   Music,
+  Palette,
 } from "lucide-react"
 import { useAudio } from "@/lib/audio-context"
 
 interface TaskBarProps {
-  onAppClick: (app: "browser" | "games" | "finder") => void
+  onAppClick: (app: "browser" | "games" | "finder" | "paint") => void
   minimizedWindows?: Array<{ id: string; title: string }>
   onRestoreWindow?: (id: string) => void
 }
@@ -64,6 +65,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
   const apps = [
     { id: "browser", icon: Globe, label: "Navegador", type: "browser" as const },
     { id: "finder", icon: Folder, label: "Finder", type: "finder" as const },
+    { id: "paint", icon: Palette, label: "Paint", type: "paint" as const },
     { id: "games", icon: Gamepad2, label: "Juegos", type: "games" as const },
   ]
 
@@ -303,10 +305,11 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
               <p className="font-semibold text-white mb-2">Características:</p>
               <ul className="space-y-1 list-disc list-inside">
                 <li>Navegador web funcional</li>
-                <li>Juego de Buscaminas</li>
+                <li>Paint para dibujar</li>
+                <li>Juegos: Buscaminas, Tetris, Snake, 2048</li>
                 <li>Explorador de archivos</li>
                 <li>Ventanas redimensionables</li>
-                <li>Sistema de pestañas</li>
+                <li>Reproductor de música</li>
               </ul>
             </div>
             <div className="border-t border-white/10 pt-3 text-xs text-white/60">
