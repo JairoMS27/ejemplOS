@@ -374,9 +374,9 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
   ]
 
   return (
-    <div className="flex h-full bg-zinc-950 text-zinc-100 font-sans selection:bg-white/20">
-      {/* Left Sidebar - Tools */}
-      <div className="w-14 bg-zinc-900/80 border-r border-white/10 flex flex-col items-center py-3 gap-1">
+    <div className="flex flex-col sm:flex-row h-full bg-zinc-950 text-zinc-100 font-sans selection:bg-white/20">
+      {/* Left Sidebar - Tools (hidden on mobile, shown at bottom) */}
+      <div className="hidden sm:flex w-14 bg-zinc-900/80 border-r border-white/10 flex-col items-center py-3 gap-1">
         {tools.map((t) => (
           <button
             key={t.id}
@@ -422,29 +422,28 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Top Toolbar */}
-        <div className="h-12 px-4 bg-zinc-900/50 border-b border-white/10 backdrop-blur-xl flex items-center gap-4">
+        <div className="h-auto sm:h-12 px-2 sm:px-4 py-2 sm:py-0 bg-zinc-900/50 border-b border-white/10 backdrop-blur-xl flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 flex-shrink-0">
           {/* Brush Size */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-zinc-400">Grosor:</span>
+            <span className="text-xs font-medium text-zinc-400 hidden sm:inline">Grosor:</span>
             <input
               type="range"
               min="1"
               max="50"
               value={brushSize}
               onChange={(e) => setBrushSize(Number(e.target.value))}
-              className="w-20 accent-white"
+              className="w-16 sm:w-20 accent-white"
             />
-            <span className="text-xs text-zinc-300 w-8 text-center bg-zinc-800 rounded px-1.5 py-0.5">{brushSize}px</span>
+            <span className="text-xs text-zinc-300 w-8 text-center bg-zinc-800 rounded px-1.5 py-0.5">{brushSize}</span>
           </div>
 
-          <div className="h-6 w-px bg-white/10" />
+          <div className="hidden sm:block h-6 w-px bg-white/10" />
 
           {/* Color selectors */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-zinc-400">Colores:</span>
-            <div className="relative w-8 h-8">
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8">
               <input
                 type="color"
                 value={color}
@@ -457,7 +456,7 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
                 style={{ backgroundColor: color }}
               />
             </div>
-            <div className="relative w-6 h-6">
+            <div className="relative w-5 h-5 sm:w-6 sm:h-6">
               <input
                 type="color"
                 value={secondaryColor}
@@ -472,10 +471,10 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
             </div>
           </div>
 
-          <div className="h-6 w-px bg-white/10" />
+          <div className="hidden sm:block h-6 w-px bg-white/10" />
 
-          {/* Zoom */}
-          <div className="flex items-center gap-1">
+          {/* Zoom - hidden on mobile */}
+          <div className="hidden sm:flex items-center gap-1">
             <button
               onClick={() => handleZoom(-25)}
               className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded transition-colors"
@@ -500,27 +499,27 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
             type="text"
             value={fileName}
             onChange={(e) => setFileName(e.target.value)}
-            className="px-3 py-1.5 text-sm bg-zinc-800/50 border border-white/10 rounded-md w-40 text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+            className="hidden sm:block px-3 py-1.5 text-sm bg-zinc-800/50 border border-white/10 rounded-md w-40 text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
           />
           <button
             onClick={clearCanvas}
-            className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-transparent hover:border-red-500/30"
+            className="p-1.5 sm:p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-transparent hover:border-red-500/30"
             title="Nuevo lienzo"
           >
             <Trash2 className="w-4 h-4" />
           </button>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-4 py-1.5 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors text-sm font-medium"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors text-xs sm:text-sm font-medium"
           >
             <Download className="w-4 h-4" />
-            Guardar
+            <span className="hidden sm:inline">Guardar</span>
           </button>
         </div>
 
         {/* Color Palette Bar */}
-        <div className="h-10 px-4 bg-zinc-900/30 border-b border-white/5 flex items-center gap-1">
-          <span className="text-xs text-zinc-500 mr-2">Paleta:</span>
+        <div className="h-8 sm:h-10 px-2 sm:px-4 bg-zinc-900/30 border-b border-white/5 flex items-center gap-0.5 sm:gap-1 overflow-x-auto flex-shrink-0">
+          <span className="text-xs text-zinc-500 mr-1 sm:mr-2 hidden sm:inline">Paleta:</span>
           {COLOR_PALETTE.map((c, i) => (
             <button
               key={i}
@@ -529,7 +528,7 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
                 e.preventDefault()
                 setSecondaryColor(c)
               }}
-              className={`w-6 h-6 rounded transition-transform hover:scale-110 ${
+              className={`w-5 h-5 sm:w-6 sm:h-6 rounded transition-transform hover:scale-110 flex-shrink-0 ${
                 color === c ? "ring-2 ring-white ring-offset-1 ring-offset-zinc-900" : ""
               }`}
               style={{ backgroundColor: c }}
@@ -539,7 +538,7 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
         </div>
 
         {/* Canvas Area */}
-        <div className="flex-1 overflow-auto bg-zinc-800/50 flex items-center justify-center p-6">
+        <div className="flex-1 overflow-auto bg-zinc-800/50 flex items-center justify-center p-2 sm:p-6 min-h-0">
           <div
             className="relative shadow-2xl shadow-black/50"
             style={{
@@ -558,11 +557,26 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
                 setCursorPos(null)
                 if (isDrawing) stopDrawing({ clientX: 0, clientY: 0 } as React.MouseEvent<HTMLCanvasElement>)
               }}
-              className="bg-white cursor-crosshair block"
+              onTouchStart={(e) => {
+                const touch = e.touches[0]
+                const mouseEvent = { clientX: touch.clientX, clientY: touch.clientY } as React.MouseEvent<HTMLCanvasElement>
+                startDrawing(mouseEvent)
+              }}
+              onTouchMove={(e) => {
+                const touch = e.touches[0]
+                const mouseEvent = { clientX: touch.clientX, clientY: touch.clientY } as React.MouseEvent<HTMLCanvasElement>
+                draw(mouseEvent)
+              }}
+              onTouchEnd={(e) => {
+                stopDrawing({ clientX: 0, clientY: 0 } as React.MouseEvent<HTMLCanvasElement>)
+              }}
+              className="bg-white cursor-crosshair block touch-none"
               style={{
                 cursor: tool === "eyedropper" ? "crosshair" :
                         tool === "fill" ? "cell" :
-                        tool === "eraser" ? "cell" : "crosshair"
+                        tool === "eraser" ? "cell" : "crosshair",
+                maxWidth: '100%',
+                maxHeight: '100%'
               }}
             />
             <canvas
@@ -574,8 +588,44 @@ export function PaintWindow({ onSave }: PaintWindowProps) {
           </div>
         </div>
 
-        {/* Status Bar */}
-        <div className="h-7 flex items-center justify-between border-t border-white/10 bg-zinc-900/50 px-4 text-[10px] font-medium text-zinc-500 backdrop-blur-xl">
+        {/* Mobile Tools Bar */}
+        <div className="flex sm:hidden h-12 items-center gap-1 px-2 bg-zinc-900/80 border-t border-white/10 overflow-x-auto flex-shrink-0">
+          {tools.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTool(t.id)}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all flex-shrink-0 ${
+                tool === t.id
+                  ? "bg-white/20 text-white"
+                  : "text-zinc-400"
+              }`}
+            >
+              {t.icon}
+            </button>
+          ))}
+          <div className="w-px h-6 bg-white/10 mx-1" />
+          <button
+            onClick={undo}
+            disabled={historyIndex <= 0}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg flex-shrink-0 ${
+              historyIndex <= 0 ? "text-zinc-600" : "text-zinc-400"
+            }`}
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={redo}
+            disabled={historyIndex >= history.length - 1}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg flex-shrink-0 ${
+              historyIndex >= history.length - 1 ? "text-zinc-600" : "text-zinc-400"
+            }`}
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Status Bar - hidden on mobile */}
+        <div className="hidden sm:flex h-7 items-center justify-between border-t border-white/10 bg-zinc-900/50 px-4 text-[10px] font-medium text-zinc-500 backdrop-blur-xl flex-shrink-0">
           <div className="flex gap-6">
             <span className="flex items-center gap-1.5">
               <Square className="w-3 h-3" />

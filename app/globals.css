@@ -233,3 +233,42 @@
 .animate-fade-in {
   animation: fade-in 0.5s ease-in;
 }
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  /* Prevent text selection on mobile for OS-like feel */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Allow text selection in inputs */
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Prevent pull-to-refresh */
+  html {
+    overscroll-behavior: none;
+  }
+
+  /* Touch-action for better scrolling */
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+
+  /* Safe area padding for notched devices */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

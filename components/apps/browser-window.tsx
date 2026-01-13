@@ -214,7 +214,8 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
 
   return (
     <div className="w-full h-full flex flex-col bg-black">
-      <div className="h-10 bg-black flex items-end gap-1 px-2 overflow-x-auto pt-2">
+      {/* Tabs - scrollable on mobile */}
+      <div className="h-10 bg-black flex items-end gap-1 px-1 sm:px-2 overflow-x-auto pt-2 flex-shrink-0">
         {tabs.map((tab) => (
           <div
             key={tab.id}
@@ -223,11 +224,11 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, tab.id)}
             onClick={() => setActiveTabId(tab.id)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-t-lg cursor-move transition-colors whitespace-nowrap text-sm ${
+            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-t-lg cursor-move transition-colors whitespace-nowrap text-xs sm:text-sm flex-shrink-0 ${
               activeTabId === tab.id ? "bg-[#1a1a1a] text-white" : "bg-transparent text-white/60 hover:bg-white/5"
             }`}
           >
-            <span className="max-w-32 truncate">{tab.title}</span>
+            <span className="max-w-20 sm:max-w-32 truncate">{tab.title}</span>
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -241,53 +242,54 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
         ))}
         <button
           onClick={handleNewTab}
-          className="mb-1 ml-1 p-1 hover:bg-white/10 rounded text-white/60 transition-colors"
+          className="mb-1 ml-1 p-1 hover:bg-white/10 rounded text-white/60 transition-colors flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="h-12 bg-[#1a1a1a] border-b border-white/10 px-4 flex items-center gap-3">
-        <div className="flex gap-1">
+      {/* Navigation bar */}
+      <div className="h-12 bg-[#1a1a1a] border-b border-white/10 px-2 sm:px-4 flex items-center gap-1 sm:gap-3 flex-shrink-0">
+        <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
           <button
             onClick={handleGoBack}
             disabled={!canGoBack}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors disabled:opacity-30"
+            className="p-1 sm:p-1.5 hover:bg-white/10 rounded-full transition-colors disabled:opacity-30"
           >
             <ChevronLeft className="w-4 h-4 text-white/80" />
           </button>
           <button
             onClick={handleGoForward}
             disabled={!canGoForward}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors disabled:opacity-30"
+            className="p-1 sm:p-1.5 hover:bg-white/10 rounded-full transition-colors disabled:opacity-30"
           >
             <ChevronRight className="w-4 h-4 text-white/80" />
           </button>
-          <button onClick={handleRefresh} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+          <button onClick={handleRefresh} className="p-1 sm:p-1.5 hover:bg-white/10 rounded-full transition-colors">
             <RotateCw className="w-3.5 h-3.5 text-white/80" />
           </button>
-          <button onClick={handleGoHome} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+          <button onClick={handleGoHome} className="hidden sm:block p-1.5 hover:bg-white/10 rounded-full transition-colors">
             <Home className="w-4 h-4 text-white/80" />
           </button>
         </div>
 
-        <form onSubmit={handleUrlChange} className="flex-1 flex items-center gap-2">
-          <div className="flex-1 bg-black/40 rounded-full px-4 py-1.5 flex items-center gap-2 border border-white/5 focus-within:border-white/20 transition-colors">
-            <Search className="w-3.5 h-3.5 text-white/40" />
+        <form onSubmit={handleUrlChange} className="flex-1 flex items-center gap-2 min-w-0">
+          <div className="flex-1 bg-black/40 rounded-full px-2 sm:px-4 py-1.5 flex items-center gap-2 border border-white/5 focus-within:border-white/20 transition-colors">
+            <Search className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Buscar o ingresar URL..."
+              placeholder="Buscar o URL..."
               value={inputUrl}
               onChange={(e) => setInputUrl(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder-white/40"
+              className="flex-1 bg-transparent text-xs sm:text-sm text-white outline-none placeholder-white/40 min-w-0"
             />
           </div>
         </form>
 
-        <div className="flex gap-1">
+        <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
           <button
             onClick={handleAddBookmark}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+            className="hidden sm:block p-1.5 hover:bg-white/10 rounded-full transition-colors"
             title="Agregar marcador"
           >
             <Star className="w-4 h-4 text-white/60" />
@@ -297,7 +299,7 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
               setShowBookmarks(!showBookmarks)
               setShowHistory(false)
             }}
-            className={`p-1.5 rounded-full transition-colors ${showBookmarks ? "bg-white/20" : "hover:bg-white/10"}`}
+            className={`p-1 sm:p-1.5 rounded-full transition-colors ${showBookmarks ? "bg-white/20" : "hover:bg-white/10"}`}
             title="Marcadores"
           >
             <Star className="w-4 h-4 text-white/60" />
@@ -307,7 +309,7 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
               setShowHistory(!showHistory)
               setShowBookmarks(false)
             }}
-            className={`p-1.5 rounded-full transition-colors ${showHistory ? "bg-white/20" : "hover:bg-white/10"}`}
+            className={`p-1 sm:p-1.5 rounded-full transition-colors ${showHistory ? "bg-white/20" : "hover:bg-white/10"}`}
             title="Historial"
           >
             <Clock className="w-4 h-4 text-white/60" />
@@ -316,16 +318,16 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
       </div>
 
       {(showBookmarks || showHistory) && (
-        <div className="bg-white/10 border-b border-white/20 p-4 max-h-48 overflow-y-auto">
+        <div className="bg-white/10 border-b border-white/20 p-2 sm:p-4 max-h-48 overflow-y-auto flex-shrink-0">
           {showBookmarks && (
             <div>
               <h3 className="text-white text-sm font-semibold mb-2">Marcadores</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {bookmarks.map((bookmark, idx) => (
                   <button
                     key={idx}
                     onClick={() => navigateToUrl(bookmark.url)}
-                    className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded text-left text-sm text-white/80 truncate"
+                    className="px-2 sm:px-3 py-2 bg-white/5 hover:bg-white/10 rounded text-left text-xs sm:text-sm text-white/80 truncate"
                   >
                     {bookmark.name}
                   </button>
@@ -441,33 +443,33 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
             />
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
-            <div className="text-center max-w-2xl px-4">
-              <h1 className="text-4xl font-bold text-white mb-4">EjemplOS Browser</h1>
-              <p className="text-white/60 mb-8">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-black overflow-auto">
+            <div className="text-center max-w-2xl px-4 py-6">
+              <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">EjemplOS Browser</h1>
+              <p className="text-white/60 mb-4 sm:mb-8 text-sm sm:text-base">
                 Ingresa una URL o búsqueda en la barra superior para navegar por la web
               </p>
 
-              <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-8">
                 {bookmarks.slice(0, 6).map((bookmark, idx) => (
                   <button
                     key={idx}
                     onClick={() => navigateToUrl(bookmark.url)}
-                    className="p-6 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
+                    className="p-3 sm:p-6 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
                   >
-                    <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-2xl text-white">{bookmark.name[0]}</span>
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                      <span className="text-lg sm:text-2xl text-white">{bookmark.name[0]}</span>
                     </div>
-                    <p className="text-white/80 text-sm font-medium">{bookmark.name}</p>
+                    <p className="text-white/80 text-xs sm:text-sm font-medium truncate">{bookmark.name}</p>
                   </button>
                 ))}
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-lg p-4 max-w-xl mx-auto">
-                <p className="text-sm text-white/60 mb-2">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 sm:p-4 max-w-xl mx-auto">
+                <p className="text-xs sm:text-sm text-white/60 mb-2">
                   Nota: Algunos sitios como Google, X, Facebook, etc. no permiten ser cargados por razones de seguridad.
                 </p>
-                <p className="text-xs text-white/40">
+                <p className="text-[10px] sm:text-xs text-white/40">
                   Funciona perfectamente con Wikipedia, GitHub, blogs y la mayoría de sitios web.
                 </p>
               </div>

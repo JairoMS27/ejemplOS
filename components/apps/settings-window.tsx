@@ -141,9 +141,27 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
   ]
 
   return (
-    <div className="flex h-full bg-zinc-950 text-zinc-100">
-      {/* Sidebar */}
-      <div className="w-52 bg-zinc-900/30 backdrop-blur-md border-r border-white/10 p-3 flex flex-col">
+    <div className="flex flex-col sm:flex-row h-full bg-zinc-950 text-zinc-100">
+      {/* Mobile Tab Bar */}
+      <div className="flex sm:hidden h-12 items-center gap-1 px-2 bg-zinc-900/50 border-b border-white/10 overflow-x-auto flex-shrink-0">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+              activeTab === tab.id
+                ? "bg-white/10 text-white"
+                : "text-zinc-400"
+            }`}
+          >
+            {tab.icon}
+            <span className="hidden xs:inline">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Desktop Sidebar */}
+      <div className="hidden sm:flex w-52 bg-zinc-900/30 backdrop-blur-md border-r border-white/10 p-3 flex-col flex-shrink-0">
         <div className="mb-4 px-3 py-2">
           <h2 className="text-lg font-semibold text-white">Ajustes</h2>
           <p className="text-xs text-zinc-500">Configuracion del sistema</p>
@@ -171,13 +189,13 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-6 bg-black/20">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-black/20">
         {/* Personalization Tab */}
         {activeTab === "personalization" && (
-          <div className="space-y-6 max-w-2xl">
+          <div className="space-y-4 sm:space-y-6 max-w-2xl">
             <div>
-              <h2 className="text-xl font-semibold text-white mb-1">Personalizacion</h2>
-              <p className="text-sm text-zinc-500">Personaliza el fondo de escritorio y la apariencia</p>
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-1">Personalizacion</h2>
+              <p className="text-xs sm:text-sm text-zinc-500">Personaliza el fondo de escritorio y la apariencia</p>
             </div>
 
             {/* Wallpaper Type Selector */}
@@ -222,7 +240,7 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
               {settings.wallpaper.type === "solid" && (
                 <div className="space-y-3">
                   <p className="text-xs text-zinc-400">Selecciona un color</p>
-                  <div className="grid grid-cols-8 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                     {presetColors.map((color) => (
                       <button
                         key={color}
@@ -281,7 +299,7 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
 
                       <div className="space-y-2">
                         <p className="text-xs text-zinc-400">Ajuste de imagen</p>
-                        <div className="flex gap-2">
+                        <div className="grid grid-cols-2 sm:flex gap-2">
                           {(["cover", "contain", "fill", "none"] as const).map((fit) => (
                             <button
                               key={fit}

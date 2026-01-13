@@ -12,6 +12,7 @@ interface DesktopIconProps {
   onPositionChange: (position: { x: number; y: number }) => void
   selected?: boolean
   onClick?: (e: React.MouseEvent) => void
+  isMobile?: boolean
 }
 
 export function DesktopIcon({
@@ -22,15 +23,20 @@ export function DesktopIcon({
   onPositionChange,
   selected,
   onClick,
+  isMobile = false,
 }: DesktopIconProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const iconRef = useRef<HTMLDivElement>(null)
   const dragStartPos = useRef({ x: 0, y: 0 })
+  const lastTapRef = useRef<number>(0)
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       onClick?.(e)
+
+      // En móvil no permitimos drag
+      if (isMobile) return
 
       if (e.detail === 1) {
         setIsDragging(true)
@@ -64,9 +70,60 @@ export function DesktopIcon({
         window.addEventListener("mouseup", handleMouseUp)
       }
     },
-    [onClick, initialPosition, onPositionChange],
+    [onClick, initialPosition, onPositionChange, isMobile],
   )
 
+  // Handler para tap en móvil (doble tap para abrir)
+  const handleTap = useCallback(() => {
+    const now = Date.now()
+    const DOUBLE_TAP_DELAY = 300
+
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // Doble tap - abrir
+      onDoubleClick?.()
+      lastTapRef.current = 0
+    } else {
+      lastTapRef.current = now
+    }
+  }, [onDoubleClick])
+
+  // En móvil usamos posición relativa (para el grid)
+  if (isMobile) {
+    return (
+      <div
+        ref={iconRef}
+        className="flex flex-col items-center gap-1 cursor-pointer select-none group transition-all active:scale-95"
+        onClick={(e) => {
+          onClick?.(e)
+          handleTap()
+        }}
+      >
+        <div
+          className={`w-14 h-14 flex items-center justify-center rounded-xl border transition-all duration-200 ${
+            selected
+              ? "bg-white/20 border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+              : "bg-white/5 border-white/10"
+          }`}
+        >
+          <Icon
+            className={`w-8 h-8 transition-transform duration-200 ${selected ? "scale-110 text-white" : "text-zinc-300"}`}
+          />
+        </div>
+        <span
+          className={`text-[10px] text-center leading-tight px-1 py-0.5 rounded transition-colors max-w-full truncate ${
+            selected
+              ? "bg-blue-600/80 text-white font-medium shadow-sm"
+              : "text-zinc-300"
+          }`}
+          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
+        >
+          {label}
+        </span>
+      </div>
+    )
+  }
+
+  // Desktop: posición absoluta con drag
   return (
     <div
       ref={iconRef}
