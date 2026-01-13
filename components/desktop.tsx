@@ -103,16 +103,17 @@ export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: Deskto
   ]
 
   return (
-    <ContextMenu>
-      <ContextMenuTrigger
-        className="w-full h-full"
-        onMouseDown={(e) => {
-          if (e.target === e.currentTarget) setSelectedIcon(null)
-        }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setSelectedIcon(null)
-        }}
-      >
+    <div className="absolute inset-0">
+      <ContextMenu>
+        <ContextMenuTrigger
+          className="absolute inset-0"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setSelectedIcon(null)
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedIcon(null)
+          }}
+        >
         {/* Mobile: Grid layout */}
         {isMobile ? (
           <div className="w-full h-full p-4 pt-16">
@@ -156,18 +157,19 @@ export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: Deskto
             ))}
           </>
         )}
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-56 bg-black border-white/20 text-white">
-        <ContextMenuItem onClick={handleRefresh} className="focus:bg-white/10 cursor-pointer">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          <span>Actualizar</span>
-        </ContextMenuItem>
-        <ContextMenuSeparator className="bg-white/20" />
-        <ContextMenuItem onClick={onOpenSettings} className="focus:bg-white/10 cursor-pointer">
-          <Monitor className="mr-2 h-4 w-4" />
-          <span>Configuracion de pantalla</span>
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-56 bg-black border-white/20 text-white">
+          <ContextMenuItem onClick={handleRefresh} className="focus:bg-white/10 cursor-pointer">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            <span>Actualizar</span>
+          </ContextMenuItem>
+          <ContextMenuSeparator className="bg-white/20" />
+          <ContextMenuItem onClick={onOpenSettings} className="focus:bg-white/10 cursor-pointer">
+            <Monitor className="mr-2 h-4 w-4" />
+            <span>Configuracion de pantalla</span>
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </div>
   )
 }
