@@ -351,7 +351,7 @@ export function FinderWindow({
   return (
     <div className="flex h-full w-full flex-col bg-zinc-950 text-zinc-100 font-sans selection:bg-white/20">
       {/* Toolbar */}
-      <div className="flex h-12 items-center gap-4 border-b border-white/10 bg-zinc-900/50 px-4 backdrop-blur-xl flex-shrink-0">
+      <div className="flex h-12 items-center gap-2 sm:gap-4 border-b border-white/10 bg-zinc-900/50 px-2 sm:px-4 backdrop-blur-xl flex-shrink-0">
         <div className="flex items-center gap-1 text-zinc-400">
           <button
             onClick={handleBack}
@@ -369,24 +369,24 @@ export function FinderWindow({
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
-          <span className="hover:text-white cursor-pointer transition-colors" onClick={() => navigateTo("Inicio")}>
+        <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-zinc-400 min-w-0">
+          <span className="hover:text-white cursor-pointer transition-colors hidden sm:inline" onClick={() => navigateTo("Inicio")}>
             EjemplOS
           </span>
-          <span className="text-zinc-600">/</span>
-          <span className="text-white">{currentPath}</span>
+          <span className="text-zinc-600 hidden sm:inline">/</span>
+          <span className="text-white truncate">{currentPath}</span>
         </div>
 
         <div className="flex-1" />
 
-        <div className="flex items-center gap-2 rounded-md bg-zinc-800/50 px-3 py-1.5 border border-white/5 focus-within:border-white/20 focus-within:bg-zinc-800 transition-all">
-          <Search className="h-3.5 w-3.5 text-zinc-500" />
+        <div className="flex items-center gap-2 rounded-md bg-zinc-800/50 px-2 sm:px-3 py-1.5 border border-white/5 focus-within:border-white/20 focus-within:bg-zinc-800 transition-all">
+          <Search className="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
           <input
             type="text"
             placeholder="Buscar"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none w-24 sm:w-40"
+            className="bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none w-16 sm:w-40"
           />
         </div>
       </div>
@@ -501,8 +501,48 @@ export function FinderWindow({
         </div>
       </div>
 
+      {/* Mobile Navigation Bar */}
+      <div className="flex md:hidden h-10 items-center gap-1 px-2 border-t border-white/10 bg-zinc-900/50 overflow-x-auto">
+        <button
+          onClick={() => navigateTo("Inicio")}
+          className={`px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors ${currentPath === "Inicio" ? "bg-white/10 text-white" : "text-zinc-400"}`}
+        >
+          <Home className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => navigateTo("Aplicaciones")}
+          className={`px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors ${currentPath === "Aplicaciones" ? "bg-white/10 text-white" : "text-zinc-400"}`}
+        >
+          Apps
+        </button>
+        <button
+          onClick={() => navigateTo("Documentos")}
+          className={`px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors ${currentPath === "Documentos" ? "bg-white/10 text-white" : "text-zinc-400"}`}
+        >
+          Docs
+        </button>
+        <button
+          onClick={() => navigateTo("Imágenes")}
+          className={`px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors ${currentPath === "Imágenes" ? "bg-white/10 text-white" : "text-zinc-400"}`}
+        >
+          Img
+        </button>
+        <button
+          onClick={() => navigateTo("Música")}
+          className={`px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors ${currentPath === "Música" ? "bg-white/10 text-white" : "text-zinc-400"}`}
+        >
+          Música
+        </button>
+        <button
+          onClick={() => navigateTo("Juegos")}
+          className={`px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors ${currentPath === "Juegos" ? "bg-white/10 text-white" : "text-zinc-400"}`}
+        >
+          Juegos
+        </button>
+      </div>
+
       {/* Status Bar */}
-      <div className="flex h-8 items-center justify-between border-t border-white/10 bg-zinc-900/50 px-4 text-[10px] font-medium text-zinc-500 backdrop-blur-xl flex-shrink-0">
+      <div className="hidden sm:flex h-8 items-center justify-between border-t border-white/10 bg-zinc-900/50 px-4 text-[10px] font-medium text-zinc-500 backdrop-blur-xl flex-shrink-0">
         <div className="flex gap-4">
           <span>{currentFiles.length} ítems</span>
           {selectedItem && <span>1 seleccionado</span>}

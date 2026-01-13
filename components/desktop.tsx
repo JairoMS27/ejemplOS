@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   ContextMenu,
   ContextMenuContent,
@@ -11,6 +11,22 @@ import {
 import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings } from "lucide-react"
 import { DesktopIcon } from "./desktop-icon"
 
+// Hook para detectar si estamos en móvil
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  return isMobile
+}
+
 interface DesktopProps {
   onOpenGamesFolder?: () => void
   onOpenApp?: (appType: "browser" | "paint", url?: string) => void
@@ -18,6 +34,7 @@ interface DesktopProps {
 }
 
 export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: DesktopProps) {
+  const isMobile = useIsMobile()
   const [iconPositions, setIconPositions] = useState({
     portfolio: { x: 50, y: 50 },
     twitter: { x: 50, y: 160 },
@@ -47,83 +64,98 @@ export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: Deskto
     }))
   }
 
+  // Datos de los iconos para renderizar dinámicamente
+  const desktopIcons = [
+    {
+      id: "portfolio",
+      icon: DoorOpen,
+      label: "Portfolio",
+      onDoubleClick: handlePortfolioClick,
+    },
+    {
+      id: "twitter",
+      icon: ({ className }: { className?: string }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      ),
+      label: "X",
+      onDoubleClick: handleTwitterClick,
+    },
+    {
+      id: "games",
+      icon: Gamepad2,
+      label: "Juegos",
+      onDoubleClick: onOpenGamesFolder,
+    },
+    {
+      id: "paint",
+      icon: Palette,
+      label: "Paint",
+      onDoubleClick: () => onOpenApp?.("paint"),
+    },
+    {
+      id: "settings",
+      icon: Settings,
+      label: "Ajustes",
+      onDoubleClick: onOpenSettings,
+    },
+  ]
+
   return (
     <ContextMenu>
       <ContextMenuTrigger
-        className="w-full h-full flex flex-col items-center justify-center"
+        className="w-full h-full"
         onMouseDown={(e) => {
           if (e.target === e.currentTarget) setSelectedIcon(null)
         }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setSelectedIcon(null)
+        }}
       >
-        {/* Desktop icons */}
-        <DesktopIcon
-          icon={DoorOpen}
-          label="Portfolio"
-          onDoubleClick={handlePortfolioClick}
-          initialPosition={iconPositions.portfolio}
-          onPositionChange={(pos) => updateIconPosition("portfolio", pos)}
-          selected={selectedIcon === "portfolio"}
-          onClick={(e) => {
-            e.stopPropagation()
-            setSelectedIcon("portfolio")
-          }}
-        />
-
-        <DesktopIcon
-          icon={({ className }: { className?: string }) => (
-            <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-          )}
-          label="X"
-          onDoubleClick={handleTwitterClick}
-          initialPosition={iconPositions.twitter}
-          onPositionChange={(pos) => updateIconPosition("twitter", pos)}
-          selected={selectedIcon === "twitter"}
-          onClick={(e) => {
-            e.stopPropagation()
-            setSelectedIcon("twitter")
-          }}
-        />
-
-        <DesktopIcon
-          icon={Gamepad2}
-          label="Juegos"
-          onDoubleClick={onOpenGamesFolder}
-          initialPosition={iconPositions.games}
-          onPositionChange={(pos) => updateIconPosition("games", pos)}
-          selected={selectedIcon === "games"}
-          onClick={(e) => {
-            e.stopPropagation()
-            setSelectedIcon("games")
-          }}
-        />
-
-        <DesktopIcon
-          icon={Palette}
-          label="Paint"
-          onDoubleClick={() => onOpenApp?.("paint")}
-          initialPosition={iconPositions.paint}
-          onPositionChange={(pos) => updateIconPosition("paint", pos)}
-          selected={selectedIcon === "paint"}
-          onClick={(e) => {
-            e.stopPropagation()
-            setSelectedIcon("paint")
-          }}
-        />
-
-        <DesktopIcon
-          icon={Settings}
-          label="Ajustes"
-          onDoubleClick={onOpenSettings}
-          initialPosition={iconPositions.settings}
-          onPositionChange={(pos) => updateIconPosition("settings", pos)}
-          selected={selectedIcon === "settings"}
-          onClick={(e) => {
-            e.stopPropagation()
-            setSelectedIcon("settings")
-          }}
-        />
+        {/* Mobile: Grid layout */}
+        {isMobile ? (
+          <div className="w-full h-full p-4 pt-16">
+            <div className="grid grid-cols-4 gap-4">
+              {desktopIcons.map((item) => (
+                <DesktopIcon
+                  key={item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  onDoubleClick={item.onDoubleClick}
+                  initialPosition={{ x: 0, y: 0 }}
+                  onPositionChange={() => {}}
+                  selected={selectedIcon === item.id}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedIcon(item.id)
+                  }}
+                  isMobile={true}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* Desktop: Absolute positioning */
+          <>
+            {desktopIcons.map((item) => (
+              <DesktopIcon
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                onDoubleClick={item.onDoubleClick}
+                initialPosition={iconPositions[item.id as keyof typeof iconPositions]}
+                onPositionChange={(pos) => updateIconPosition(item.id as keyof typeof iconPositions, pos)}
+                selected={selectedIcon === item.id}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedIcon(item.id)
+                }}
+                isMobile={false}
+              />
+            ))}
+          </>
+        )}
       </ContextMenuTrigger>
       <ContextMenuContent className="w-56 bg-black border-white/20 text-white">
         <ContextMenuItem onClick={handleRefresh} className="focus:bg-white/10 cursor-pointer">

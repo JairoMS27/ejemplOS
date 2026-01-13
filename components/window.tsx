@@ -9,6 +9,22 @@ import {
 } from '@/components/ui/context-menu'
 import { Maximize, Minimize, X, Move } from 'lucide-react'
 
+// Hook para detectar si estamos en móvil
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  return isMobile
+}
+
 interface WindowProps {
   id: string
   title: string
@@ -26,13 +42,13 @@ interface WindowProps {
   onPositionChange?: (position: { x: number; y: number }) => void
 }
 
-export function Window({ 
-  id, 
-  title, 
-  zIndex, 
+export function Window({
+  id,
+  title,
+  zIndex,
   isMaximized = false,
   isMinimized = false,
-  onClose, 
+  onClose,
   onMinimize,
   onMaximize,
   onFocus,
@@ -40,8 +56,9 @@ export function Window({
   savedPosition,
   onSizeChange,
   onPositionChange,
-  children 
+  children
 }: WindowProps) {
+  const isMobile = useIsMobile()
   const [size, setSize] = useState(savedSize || { width: 900, height: 600 })
   const [position, setPosition] = useState(savedPosition || { x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
@@ -127,8 +144,8 @@ export function Window({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('[data-no-drag]')) return
-    if (isMaximized) return
-    
+    if (isMaximized || isMobile) return
+
     onFocus()
     setIsDragging(true)
     setDragOffset({
@@ -138,7 +155,7 @@ export function Window({
   }
 
   const handleResizeStart = (e: React.MouseEvent, direction: string) => {
-    if (isMaximized) return
+    if (isMaximized || isMobile) return
     e.stopPropagation()
     onFocus()
     setIsResizing(true)
@@ -165,6 +182,9 @@ export function Window({
     return cursors[direction] || ''
   }
 
+  // En móvil, siempre fullscreen
+  const isFullscreen = isMobile || isMaximized
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -173,18 +193,18 @@ export function Window({
           style={{
             display: isMinimized ? 'none' : 'block',
             position: 'fixed',
-            left: isMaximized ? '0' : `${position.x}px`,
-            top: isMaximized ? '0' : `${position.y}px`,
-            width: isMaximized ? '100vw' : `${size.width}px`,
-            height: isMaximized ? 'calc(100vh - 64px)' : `${size.height}px`,
+            left: isFullscreen ? '0' : `${position.x}px`,
+            top: isFullscreen ? '0' : `${position.y}px`,
+            width: isFullscreen ? '100vw' : `${size.width}px`,
+            height: isFullscreen ? 'calc(100vh - 48px)' : `${size.height}px`,
             zIndex,
           }}
-          className={`max-w-screen animate-window-open select-none ${isMaximized ? 'rounded-none' : ''}`}
+          className={`max-w-screen animate-window-open select-none ${isFullscreen ? 'rounded-none' : ''}`}
         >
           {/* Title bar */}
           <div
             onMouseDown={handleMouseDown}
-            className={`h-10 bg-gray-100 border border-black/20 ${isMaximized ? 'rounded-none' : 'rounded-t-xl'} flex items-center justify-between px-4 cursor-move hover:bg-gray-50 transition-colors select-none`}
+            className={`h-10 bg-gray-100 border border-black/20 ${isFullscreen ? 'rounded-none' : 'rounded-t-xl'} flex items-center justify-between px-2 sm:px-4 ${isMobile ? 'cursor-default' : 'cursor-move'} hover:bg-gray-50 transition-colors select-none`}
           >
             <div className="flex items-center gap-3 flex-1">
               <div className="flex gap-2">
@@ -220,12 +240,12 @@ export function Window({
           {/* Content */}
           <div
             data-no-drag
-            className={`bg-white border border-t-0 border-black/20 ${isMaximized ? 'rounded-none h-full' : 'rounded-b-xl'} overflow-hidden shadow-lg relative select-none`}
-            style={{ height: isMaximized ? 'calc(100% - 40px)' : `${size.height - 40}px` }}
+            className={`bg-white border border-t-0 border-black/20 ${isFullscreen ? 'rounded-none h-full' : 'rounded-b-xl'} overflow-hidden shadow-lg relative select-none`}
+            style={{ height: isFullscreen ? 'calc(100% - 40px)' : `${size.height - 40}px` }}
           >
             {children}
 
-            {!isMaximized && (
+            {!isFullscreen && (
               <>
                 {/* Bordes */}
                 <div

@@ -79,7 +79,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-12 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center px-2 gap-2 z-50 select-none">
+    <div className="fixed bottom-0 left-0 right-0 h-12 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center px-1 sm:px-2 gap-1 sm:gap-2 z-50 select-none">
       {/* Start Button */}
       <div className="relative" ref={startMenuRef}>
         <button
@@ -117,11 +117,11 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
         )}
       </div>
 
-      {/* Separator */}
-      <div className="w-px h-8 bg-white/20" />
+      {/* Separator - hidden on mobile */}
+      <div className="hidden sm:block w-px h-8 bg-white/20" />
 
-      {/* Quick Launch Icons */}
-      <div className="flex items-center gap-2">
+      {/* Quick Launch Icons - hidden on mobile */}
+      <div className="hidden sm:flex items-center gap-2">
         {apps.map((app) => {
           const Icon = app.icon
           return (
@@ -140,15 +140,16 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
       {minimizedWindows.length > 0 && (
         <>
           <div className="w-px h-8 bg-white/20" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto max-w-[40vw] sm:max-w-none">
             {minimizedWindows.map((window) => (
               <button
                 key={window.id}
                 onClick={() => onRestoreWindow?.(window.id)}
-                className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-sm text-white transition-all"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-xs sm:text-sm text-white transition-all whitespace-nowrap flex-shrink-0"
                 title={`Restaurar ${window.title}`}
               >
-                {window.title}
+                <span className="hidden sm:inline">{window.title}</span>
+                <span className="sm:hidden">{window.title.slice(0, 8)}{window.title.length > 8 ? '...' : ''}</span>
               </button>
             ))}
           </div>
@@ -158,19 +159,30 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
       {/* Spacer */}
       <div className="flex-1" />
 
+      {/* Music player - hidden on mobile, show only play button */}
       {audio.currentTrack && (
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10 max-w-[200px]">
-          <Music className="w-4 h-4 text-white/70 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-white truncate">{audio.currentTrack.fileName}</p>
+        <>
+          {/* Full player on desktop */}
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10 max-w-[200px]">
+            <Music className="w-4 h-4 text-white/70 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-white truncate">{audio.currentTrack.fileName}</p>
+            </div>
+            <button
+              onClick={audio.togglePlayPause}
+              className="flex-shrink-0 text-white/70 hover:text-white transition-colors"
+            >
+              {audio.isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            </button>
           </div>
+          {/* Mini player on mobile */}
           <button
             onClick={audio.togglePlayPause}
-            className="flex-shrink-0 text-white/70 hover:text-white transition-colors"
+            className="sm:hidden flex items-center justify-center w-8 h-8 rounded bg-white/10 hover:bg-white/20 transition-all"
           >
-            {audio.isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            {audio.isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
           </button>
-        </div>
+        </>
       )}
 
       <div className="relative" ref={controlCenterRef}>
@@ -183,7 +195,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
         </button>
 
         {showControlCenter && (
-          <div className="absolute bottom-full right-0 mb-2 w-80 bg-black/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl p-4 z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
+          <div className="absolute bottom-full right-0 mb-2 w-[calc(100vw-16px)] sm:w-80 max-w-80 bg-black/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl p-3 sm:p-4 z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
             <div className="mb-3 pb-3 border-b border-white/10">
               <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">Centro de Control</p>
             </div>
@@ -280,21 +292,22 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
         )}
       </div>
 
+      {/* Info button - hidden on mobile */}
       <button
         onClick={() => setShowAbout(!showAbout)}
-        className="flex items-center justify-center w-10 h-10 rounded hover:bg-white/10 transition-all border border-transparent hover:border-white/20"
+        className="hidden sm:flex items-center justify-center w-10 h-10 rounded hover:bg-white/10 transition-all border border-transparent hover:border-white/20"
         title="Acerca de EjemplOS"
       >
         <Info className="w-5 h-5 text-white/70" />
       </button>
 
       {/* System Tray - Time */}
-      <div className="flex items-center px-3 py-2">
-        <span className="text-sm text-white font-medium tabular-nums">{time}</span>
+      <div className="flex items-center px-2 sm:px-3 py-2">
+        <span className="text-xs sm:text-sm text-white font-medium tabular-nums">{time}</span>
       </div>
 
       {showAbout && (
-        <div className="absolute bottom-20 right-4 w-80 bg-black/95 backdrop-blur-xl border-2 border-white/30 rounded-lg shadow-2xl p-6 z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
+        <div className="absolute bottom-14 sm:bottom-20 right-2 sm:right-4 w-[calc(100vw-16px)] sm:w-80 max-w-80 bg-black/95 backdrop-blur-xl border-2 border-white/30 rounded-lg shadow-2xl p-4 sm:p-6 z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold text-white">EjemplOS</h3>
             <button onClick={() => setShowAbout(false)} className="text-white/60 hover:text-white transition-colors">
