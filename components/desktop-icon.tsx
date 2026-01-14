@@ -26,9 +26,9 @@ export function DesktopIcon({
   isMobile = false,
 }: DesktopIconProps) {
   const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const iconRef = useRef<HTMLDivElement>(null)
   const dragStartPos = useRef({ x: 0, y: 0 })
+  const dragOffset = useRef({ x: 0, y: 0 })
   const lastTapRef = useRef<number>(0)
 
   const handleMouseDown = useCallback(
@@ -41,17 +41,21 @@ export function DesktopIcon({
       if (e.detail === 1) {
         setIsDragging(true)
         dragStartPos.current = { x: e.clientX, y: e.clientY }
-        setDragOffset({ x: 0, y: 0 })
+        dragOffset.current = { x: 0, y: 0 }
         e.preventDefault()
 
         const handleMouseMove = (moveEvent: MouseEvent) => {
           const deltaX = moveEvent.clientX - dragStartPos.current.x
           const deltaY = moveEvent.clientY - dragStartPos.current.y
-          setDragOffset({ x: deltaX, y: deltaY })
+          dragOffset.current = { x: deltaX, y: deltaY }
+
+          // Manipular el DOM directamente para un movimiento suave sin re-renders
+          if (iconRef.current) {
+            iconRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`
+          }
         }
 
         const handleMouseUp = (upEvent: MouseEvent) => {
-          setIsDragging(false)
           window.removeEventListener("mousemove", handleMouseMove)
           window.removeEventListener("mouseup", handleMouseUp)
 
@@ -62,7 +66,13 @@ export function DesktopIcon({
             y: initialPosition.y + deltaY,
           }
 
-          setDragOffset({ x: 0, y: 0 })
+          // Resetear el transform antes de actualizar la posición
+          if (iconRef.current) {
+            iconRef.current.style.transform = "none"
+          }
+
+          dragOffset.current = { x: 0, y: 0 }
+          setIsDragging(false)
           onPositionChange(finalPosition)
         }
 
@@ -127,13 +137,12 @@ export function DesktopIcon({
   return (
     <div
       ref={iconRef}
-      className={`absolute flex flex-col items-center gap-1 cursor-pointer select-none w-24 group transition-all ${
+      className={`absolute flex flex-col items-center gap-1 cursor-pointer select-none w-24 group ${
         isDragging ? "z-50" : "z-0"
       }`}
       style={{
         left: `${initialPosition.x}px`,
         top: `${initialPosition.y}px`,
-        transform: isDragging ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : "none",
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={onDoubleClick}
