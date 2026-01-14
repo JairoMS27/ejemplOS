@@ -81,7 +81,7 @@ function HomeContent() {
   const [openWindows, setOpenWindows] = useState<
     Array<{
       id: string
-      type: "browser" | "minesweeper" | "finder" | "games" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file"
+      type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file"
       title: string
       zIndex: number
       fileName?: string
@@ -105,7 +105,7 @@ function HomeContent() {
   }, [])
 
   const openApplication = (
-    type: "browser" | "minesweeper" | "finder" | "games" | "tetris" | "2048" | "paint" | "snake" | "settings",
+    type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings",
     initialUrl?: string,
   ) => {
     const newWindow = {
@@ -120,15 +120,17 @@ function HomeContent() {
               ? "Finder"
               : type === "games"
                 ? "Juegos"
-                : type === "tetris"
-                  ? "Tetris"
-                  : type === "2048"
-                    ? "2048"
-                    : type === "paint"
-                      ? "Paint"
-                      : type === "settings"
-                        ? "Ajustes"
-                        : "Snake",
+                : type === "projects"
+                  ? "Mis Proyectos"
+                  : type === "tetris"
+                    ? "Tetris"
+                    : type === "2048"
+                      ? "2048"
+                      : type === "paint"
+                        ? "Paint"
+                        : type === "settings"
+                          ? "Ajustes"
+                          : "Snake",
       zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
       initialUrl: initialUrl,
       isMaximized: false,
@@ -138,7 +140,7 @@ function HomeContent() {
           ? { width: 500, height: 600 }
           : type === "tetris" || type === "2048" || type === "snake"
             ? { width: 500, height: 700 }
-            : type === "games"
+            : type === "games" || type === "projects"
               ? { width: 700, height: 600 }
               : type === "paint"
                 ? { width: 900, height: 700 }
@@ -152,6 +154,10 @@ function HomeContent() {
 
   const openGamesFolder = () => {
     openApplication("games")
+  }
+
+  const openProjectsFolder = () => {
+    openApplication("projects")
   }
 
   const openGame = (gameType: "minesweeper" | "tetris" | "2048" | "snake") => {
@@ -226,7 +232,7 @@ function HomeContent() {
       <div className="relative z-10 w-full h-full flex flex-col">
         {/* Desktop area */}
         <div className="flex-1 overflow-hidden relative">
-          <Desktop onOpenGamesFolder={openGamesFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} />
+          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} />
 
           {/* Windows */}
           <WindowManager

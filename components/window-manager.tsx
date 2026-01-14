@@ -10,10 +10,11 @@ import { Window } from "./window"
 import { PaintWindow } from "./apps/paint-window"
 import { SnakeWindow } from "./apps/snake-window"
 import { SettingsWindow } from "./apps/settings-window"
+import { ProjectsFolder } from "./apps/projects-folder"
 
 interface OpenWindow {
   id: string
-  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "tetris" | "2048" | "paint" | "snake" | "settings"
+  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings"
   title: string
   zIndex: number
   fileName?: string
@@ -105,6 +106,12 @@ export function WindowManager({
           {window.type === "tetris" && <TetrisWindow />}
           {window.type === "2048" && <Game2048 />}
           {window.type === "settings" && <SettingsWindow isMaximized={window.isMaximized} />}
+          {window.type === "projects" && (
+            <ProjectsFolder
+              onOpenProject={(url) => onOpenApp?.("browser", url)}
+              isMaximized={window.isMaximized}
+            />
+          )}
         </Window>
       ))}
     </>

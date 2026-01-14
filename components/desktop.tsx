@@ -8,7 +8,7 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu"
-import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings } from "lucide-react"
+import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings, FolderOpen } from "lucide-react"
 import { DesktopIcon } from "./desktop-icon"
 
 // Hook para detectar si estamos en móvil
@@ -29,18 +29,20 @@ function useIsMobile() {
 
 interface DesktopProps {
   onOpenGamesFolder?: () => void
+  onOpenProjectsFolder?: () => void
   onOpenApp?: (appType: "browser" | "paint", url?: string) => void
   onOpenSettings?: () => void
 }
 
-export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: DesktopProps) {
+export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, onOpenSettings }: DesktopProps) {
   const isMobile = useIsMobile()
   const [iconPositions, setIconPositions] = useState({
     portfolio: { x: 50, y: 50 },
     twitter: { x: 50, y: 160 },
     games: { x: 50, y: 270 },
-    paint: { x: 50, y: 380 },
-    settings: { x: 50, y: 490 },
+    projects: { x: 50, y: 380 },
+    paint: { x: 50, y: 490 },
+    settings: { x: 50, y: 600 },
   })
 
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
@@ -57,7 +59,7 @@ export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: Deskto
     window.location.href = "https://twitter.com/ej3mplo"
   }
 
-  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "paint" | "settings", position: { x: number; y: number }) => {
+  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "projects" | "paint" | "settings", position: { x: number; y: number }) => {
     setIconPositions((prev) => ({
       ...prev,
       [icon]: position,
@@ -87,6 +89,12 @@ export function Desktop({ onOpenGamesFolder, onOpenApp, onOpenSettings }: Deskto
       icon: Gamepad2,
       label: "Juegos",
       onDoubleClick: onOpenGamesFolder,
+    },
+    {
+      id: "projects",
+      icon: FolderOpen,
+      label: "Mis Proyectos",
+      onDoubleClick: onOpenProjectsFolder,
     },
     {
       id: "paint",
