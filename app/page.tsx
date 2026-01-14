@@ -131,7 +131,7 @@ function HomeContent() {
                         : type === "settings"
                           ? "Ajustes"
                           : type === "ipod"
-                            ? "iPod"
+                            ? "EjPod"
                             : "Snake",
       zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
       initialUrl: initialUrl,
@@ -255,7 +255,7 @@ function HomeContent() {
       <div className="relative z-10 w-full h-full flex flex-col">
         {/* Desktop area */}
         <div className="flex-1 overflow-hidden relative">
-          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} />
+          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} onOpenEjPod={() => openApplication("ipod")} />
 
           {/* Windows */}
           <WindowManager

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Music, Play, Pause, ChevronUp, ChevronDown, SkipBack, SkipForward } from "lucide-react"
+import { Music, Play, Pause, ChevronUp, ChevronDown, SkipBack, SkipForward, X, Minus } from "lucide-react"
 import { useAudio } from "@/lib/audio-context"
 
 interface Track {
@@ -16,10 +16,19 @@ interface IPodWindowProps {
     fileName: string
     audioUrl: string
   }
+  onClose?: () => void
+  onMinimize?: () => void
+  onFocus?: () => void
+  zIndex?: number
+  savedPosition?: { x: number; y: number }
+  onPositionChange?: (position: { x: number; y: number }) => void
 }
 
-export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowProps) {
+export function IPodWindow({ isMaximized, windowId, initialTrack, onClose, onMinimize, onFocus, zIndex = 1, savedPosition, onPositionChange }: IPodWindowProps) {
   const audio = useAudio()
+  const [position, setPosition] = useState(savedPosition || { x: 100, y: 100 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [tracks, setTracks] = useState<Track[]>([])
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [menuMode, setMenuMode] = useState<"songs" | "nowPlaying">("songs")
@@ -70,6 +79,49 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
   const isCurrentTrack = audio.currentTrack?.audioUrl === currentTrack?.audioUrl
   const isPlaying = isCurrentTrack && audio.isPlaying
 
+  // Dragging logic
+  useEffect(() => {
+    if (savedPosition && (savedPosition.x !== position.x || savedPosition.y !== position.y)) {
+      setPosition(savedPosition)
+    }
+  }, [savedPosition?.x, savedPosition?.y])
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const newPosition = {
+          x: e.clientX - dragOffset.x,
+          y: Math.max(0, e.clientY - dragOffset.y),
+        }
+        setPosition(newPosition)
+        onPositionChange?.(newPosition)
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, dragOffset, onPositionChange])
+
+  const handleDragStart = (e: React.MouseEvent) => {
+    onFocus?.()
+    setIsDragging(true)
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    })
+  }
+
   // Setup audio analyser for visualizer
   useEffect(() => {
     if (!isPlaying) return
@@ -82,30 +134,58 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
 
         const audioElement = audioElements[0]
 
-        // Only create new context if we don't have one or if the audio element changed
+        // Create audio context if needed
+        if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+        }
+
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume()
+        }
+
+        // Check if this audio element is different from the last one
         if (audioElementRef.current !== audioElement) {
           audioElementRef.current = audioElement
 
-          if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
-          }
+          // Reset refs when audio element changes
+          sourceRef.current = null
+          analyserRef.current = null
+        }
 
-          if (audioContextRef.current.state === 'suspended') {
-            await audioContextRef.current.resume()
-          }
+        // Only create new source if we haven't already for this element
+        if (!analyserRef.current) {
+          try {
+            // Check if element already has a source by looking for our marker
+            const existingSource = (audioElement as any)._audioSourceNode
 
-          // Only create new source if needed
-          if (!sourceRef.current) {
-            try {
-              sourceRef.current = audioContextRef.current.createMediaElementSource(audioElement)
+            if (existingSource) {
+              // Reuse existing source
+              sourceRef.current = existingSource
               analyserRef.current = audioContextRef.current.createAnalyser()
               analyserRef.current.fftSize = 256
+              analyserRef.current.smoothingTimeConstant = 0.8
+
+              // Disconnect and reconnect to insert analyser
+              if (sourceRef.current) {
+                sourceRef.current.disconnect()
+                sourceRef.current.connect(analyserRef.current)
+              }
+              analyserRef.current.connect(audioContextRef.current.destination)
+            } else {
+              // Create new source
+              sourceRef.current = audioContextRef.current.createMediaElementSource(audioElement)
+              // Store reference on the element to prevent duplicate creation
+              ;(audioElement as any)._audioSourceNode = sourceRef.current
+
+              analyserRef.current = audioContextRef.current.createAnalyser()
+              analyserRef.current.fftSize = 256
+              analyserRef.current.smoothingTimeConstant = 0.8
+
               sourceRef.current.connect(analyserRef.current)
               analyserRef.current.connect(audioContextRef.current.destination)
-            } catch (e) {
-              // Source might already be connected
-              console.log("Audio source already connected")
             }
+          } catch (e) {
+            console.log("Audio source setup failed, using fallback visualizer:", e)
           }
         }
       } catch (error) {
@@ -114,7 +194,7 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
     }
 
     setupAnalyser()
-  }, [isPlaying])
+  }, [isPlaying, currentTrack?.audioUrl])
 
   // Canvas visualizer drawing
   const drawVisualizer = useCallback(() => {
@@ -133,7 +213,7 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
     ctx.fillStyle = '#0a0a0f'
     ctx.fillRect(0, 0, width, height)
 
-    if (!analyser || !isPlaying) {
+    if (!isPlaying) {
       // Draw idle state - subtle glow
       const gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2)
       gradient.addColorStop(0, 'rgba(139, 92, 246, 0.1)')
@@ -145,9 +225,27 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
       return
     }
 
-    const bufferLength = analyser.frequencyBinCount
-    const dataArray = new Uint8Array(bufferLength)
-    analyser.getByteFrequencyData(dataArray)
+    let dataArray: Uint8Array
+    const bufferLength = analyser ? analyser.frequencyBinCount : 128
+
+    if (analyser) {
+      const tempArray = new Uint8Array(bufferLength)
+      analyser.getByteFrequencyData(tempArray)
+      dataArray = tempArray
+    } else {
+      // Fallback: generate animated data based on time
+      const time = Date.now() / 1000
+      dataArray = new Uint8Array(bufferLength)
+      for (let i = 0; i < bufferLength; i++) {
+        const wave1 = Math.sin(time * 3 + i * 0.1) * 0.3 + 0.5
+        const wave2 = Math.sin(time * 5 + i * 0.2) * 0.2
+        const wave3 = Math.sin(time * 2 + i * 0.05) * 0.3
+        const combined = wave1 + wave2 + wave3
+        // More bass in lower frequencies
+        const bassBoost = i < bufferLength / 4 ? 1.5 : 1
+        dataArray[i] = Math.min(255, Math.max(0, combined * 180 * bassBoost))
+      }
+    }
 
     // Draw the circular visualizer (Windows Media Player style)
     const centerX = width / 2
@@ -293,12 +391,56 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
   }
 
   return (
-    <div className={`w-full h-full flex items-center justify-center bg-zinc-950 p-4 ${isMaximized ? "" : ""}`}>
+    <div
+      className="fixed select-none animate-window-open"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        zIndex,
+      }}
+      onMouseDown={() => onFocus?.()}
+    >
       {/* iPod Body */}
-      <div className="relative w-full max-w-[280px] aspect-[9/16] bg-gradient-to-b from-zinc-200 to-zinc-400 rounded-[2rem] shadow-2xl border border-zinc-300 flex flex-col overflow-hidden">
+      <div className="relative w-[280px] bg-gradient-to-b from-zinc-200 to-zinc-400 rounded-[2rem] shadow-2xl border border-zinc-300 flex flex-col overflow-hidden">
+
+        {/* Window Controls - Draggable area */}
+        <div
+          className="absolute top-2 left-2 right-2 flex items-center justify-between z-20 cursor-move"
+          onMouseDown={handleDragStart}
+        >
+          <div className="flex gap-1.5">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onClose?.()
+              }}
+              className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors shadow-sm"
+              title="Cerrar"
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onMinimize?.()
+              }}
+              className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors shadow-sm"
+              title="Minimizar"
+            />
+          </div>
+        </div>
+
+        {/* Kawaii Stickers */}
+        <div className="absolute top-1 right-3 z-10 text-2xl transform rotate-12 drop-shadow-md">
+          ⭐
+        </div>
+        <div className="absolute bottom-24 right-1 z-10 text-xl transform -rotate-6 drop-shadow-md">
+          🌸
+        </div>
+        <div className="absolute bottom-32 left-1 z-10 text-lg transform rotate-12 drop-shadow-md">
+          ✨
+        </div>
 
         {/* Screen Container */}
-        <div className="mx-4 mt-4 mb-2 flex-shrink-0">
+        <div className="mx-4 mt-8 mb-2 flex-shrink-0">
           <div className="bg-black rounded-lg overflow-hidden border-4 border-zinc-800 shadow-inner">
             {/* Screen */}
             <div className="h-[180px] relative overflow-hidden">
@@ -358,7 +500,7 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
                   {/* Header */}
                   <div className="bg-zinc-800 px-3 py-1.5 border-b border-zinc-700">
                     <div className="flex items-center justify-between">
-                      <span className="text-white text-xs font-bold">iPod</span>
+                      <span className="text-white text-xs font-bold">EjPod</span>
                       <div className="flex items-center gap-1">
                         {isPlaying && (
                           <Play className="w-3 h-3 text-white fill-white" />
@@ -419,7 +561,7 @@ export function IPodWindow({ isMaximized, windowId, initialTrack }: IPodWindowPr
 
         {/* iPod label */}
         <div className="text-center mb-2">
-          <span className="text-zinc-600 text-[10px] font-medium tracking-widest">iPod</span>
+          <span className="text-zinc-600 text-[10px] font-medium tracking-widest">EjPod</span>
         </div>
 
         {/* Click Wheel */}

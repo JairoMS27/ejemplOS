@@ -56,72 +56,86 @@ export function WindowManager({
 }: WindowManagerProps) {
   return (
     <>
-      {windows.map((window) => (
-        <Window
-          key={window.id}
-          id={window.id}
-          title={window.title}
-          zIndex={window.zIndex}
-          isMaximized={window.isMaximized}
-          isMinimized={window.isMinimized}
-          savedSize={window.savedSize}
-          savedPosition={window.savedPosition}
-          onClose={() => onClose(window.id)}
-          onMinimize={() => onMinimize?.(window.id)}
-          onMaximize={() => onMaximize?.(window.id)}
-          onFocus={() => onFocus(window.id)}
-          onSizeChange={(size) => onSizeChange?.(window.id, size)}
-          onPositionChange={(position) => onPositionChange?.(window.id, position)}
-        >
-          {window.type === "browser" && <BrowserWindow initialUrl={window.initialUrl} />}
-          {window.type === "minesweeper" && <MinesweeperWindow />}
-          {window.type === "paint" && <PaintWindow />}
-          {window.type === "snake" && <SnakeWindow />}
-          {window.type === "finder" && (
-            <FinderWindow
-              onOpenFile={onOpenFile}
-              onOpenGame={onOpenGame}
-              onOpenApp={onOpenApp}
-              isMaximized={window.isMaximized}
-            />
-          )}
-          {window.type === "file" && (
-            <FileWindow
-              fileName={window.fileName}
-              fileType={window.fileType}
-              imageUrl={window.imageUrl}
-              audioUrl={window.audioUrl}
-              isMaximized={window.isMaximized}
-              windowId={window.id}
-            />
-          )}
-          {window.type === "games" && (
-            <FinderWindow
-              onOpenFile={onOpenFile}
-              onOpenGame={onOpenGame}
-              onOpenApp={onOpenApp}
-              isMaximized={window.isMaximized}
-              initialPath="Juegos"
-            />
-          )}
-          {window.type === "tetris" && <TetrisWindow />}
-          {window.type === "2048" && <Game2048 />}
-          {window.type === "settings" && <SettingsWindow isMaximized={window.isMaximized} />}
-          {window.type === "projects" && (
-            <ProjectsFolder
-              onOpenProject={(url) => onOpenApp?.("browser", url)}
-              isMaximized={window.isMaximized}
-            />
-          )}
-          {window.type === "ipod" && (
+      {windows.map((window) => {
+        // iPod renders as its own window without the standard Window wrapper
+        if (window.type === "ipod") {
+          if (window.isMinimized) return null
+          return (
             <IPodWindow
+              key={window.id}
               isMaximized={window.isMaximized}
               windowId={window.id}
               initialTrack={window.audioUrl ? { fileName: window.fileName || '', audioUrl: window.audioUrl } : undefined}
+              onClose={() => onClose(window.id)}
+              onMinimize={() => onMinimize?.(window.id)}
+              onFocus={() => onFocus(window.id)}
+              zIndex={window.zIndex}
+              savedPosition={window.savedPosition}
+              onPositionChange={(position) => onPositionChange?.(window.id, position)}
             />
-          )}
-        </Window>
-      ))}
+          )
+        }
+
+        return (
+          <Window
+            key={window.id}
+            id={window.id}
+            title={window.title}
+            zIndex={window.zIndex}
+            isMaximized={window.isMaximized}
+            isMinimized={window.isMinimized}
+            savedSize={window.savedSize}
+            savedPosition={window.savedPosition}
+            onClose={() => onClose(window.id)}
+            onMinimize={() => onMinimize?.(window.id)}
+            onMaximize={() => onMaximize?.(window.id)}
+            onFocus={() => onFocus(window.id)}
+            onSizeChange={(size) => onSizeChange?.(window.id, size)}
+            onPositionChange={(position) => onPositionChange?.(window.id, position)}
+          >
+            {window.type === "browser" && <BrowserWindow initialUrl={window.initialUrl} />}
+            {window.type === "minesweeper" && <MinesweeperWindow />}
+            {window.type === "paint" && <PaintWindow />}
+            {window.type === "snake" && <SnakeWindow />}
+            {window.type === "finder" && (
+              <FinderWindow
+                onOpenFile={onOpenFile}
+                onOpenGame={onOpenGame}
+                onOpenApp={onOpenApp}
+                isMaximized={window.isMaximized}
+              />
+            )}
+            {window.type === "file" && (
+              <FileWindow
+                fileName={window.fileName}
+                fileType={window.fileType}
+                imageUrl={window.imageUrl}
+                audioUrl={window.audioUrl}
+                isMaximized={window.isMaximized}
+                windowId={window.id}
+              />
+            )}
+            {window.type === "games" && (
+              <FinderWindow
+                onOpenFile={onOpenFile}
+                onOpenGame={onOpenGame}
+                onOpenApp={onOpenApp}
+                isMaximized={window.isMaximized}
+                initialPath="Juegos"
+              />
+            )}
+            {window.type === "tetris" && <TetrisWindow />}
+            {window.type === "2048" && <Game2048 />}
+            {window.type === "settings" && <SettingsWindow isMaximized={window.isMaximized} />}
+            {window.type === "projects" && (
+              <ProjectsFolder
+                onOpenProject={(url) => onOpenApp?.("browser", url)}
+                isMaximized={window.isMaximized}
+              />
+            )}
+          </Window>
+        )
+      })}
     </>
   )
 }
