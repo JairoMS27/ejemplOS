@@ -39,6 +39,15 @@ export function IPodWindow({ isMaximized, windowId, initialTrack, onClose, onMin
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
   const audioElementRef = useRef<HTMLAudioElement | null>(null)
 
+  // Cleanup: stop audio when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audio.currentTrack?.windowId === windowId) {
+        audio.stop()
+      }
+    }
+  }, [windowId])
+
   // Load tracks from Música folder
   useEffect(() => {
     const musicTracks: Track[] = [
@@ -412,6 +421,10 @@ export function IPodWindow({ isMaximized, windowId, initialTrack, onClose, onMin
             <button
               onClick={(e) => {
                 e.stopPropagation()
+                // Stop audio if this window is playing it
+                if (audio.currentTrack?.windowId === windowId) {
+                  audio.stop()
+                }
                 onClose?.()
               }}
               className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors shadow-sm"
