@@ -13,7 +13,6 @@ import {
   Key,
   HelpCircle,
   Rocket,
-  Globe,
   Home,
   FolderOpen,
   Gamepad2,
@@ -304,12 +303,13 @@ export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderPro
                   }`}
                 >
                   <div className="relative">
-                    <Globe
-                      className={`w-10 h-10 ${selectedProject === project.id ? "text-blue-400" : "text-zinc-400 group-hover:text-blue-400"} transition-colors`}
-                    />
-                    <div className="absolute -bottom-1 -right-1 bg-zinc-900 rounded-full p-0.5 border border-zinc-800">
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
+                      selectedProject === project.id
+                        ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-lg shadow-blue-500/10"
+                        : "bg-zinc-800/50 group-hover:bg-zinc-700/50"
+                    }`}>
                       <project.Icon
-                        className={`w-3 h-3 ${selectedProject === project.id ? "text-white" : "text-zinc-400"}`}
+                        className={`w-7 h-7 ${selectedProject === project.id ? "text-blue-400" : "text-zinc-300 group-hover:text-white"} transition-colors`}
                       />
                     </div>
                   </div>
