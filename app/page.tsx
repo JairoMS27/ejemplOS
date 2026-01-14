@@ -81,7 +81,7 @@ function HomeContent() {
   const [openWindows, setOpenWindows] = useState<
     Array<{
       id: string
-      type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file"
+      type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file" | "ipod"
       title: string
       zIndex: number
       fileName?: string
@@ -105,7 +105,7 @@ function HomeContent() {
   }, [])
 
   const openApplication = (
-    type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings",
+    type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ipod",
     initialUrl?: string,
   ) => {
     const newWindow = {
@@ -130,7 +130,9 @@ function HomeContent() {
                         ? "Paint"
                         : type === "settings"
                           ? "Ajustes"
-                          : "Snake",
+                          : type === "ipod"
+                            ? "iPod"
+                            : "Snake",
       zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
       initialUrl: initialUrl,
       isMaximized: false,
@@ -146,7 +148,9 @@ function HomeContent() {
                 ? { width: 900, height: 700 }
                 : type === "settings"
                   ? { width: 800, height: 600 }
-                  : { width: 900, height: 600 },
+                  : type === "ipod"
+                    ? { width: 320, height: 580 }
+                    : { width: 900, height: 600 },
       savedPosition: { x: 100 + openWindows.length * 30, y: 100 + openWindows.length * 30 },
     }
     setOpenWindows([...openWindows, newWindow])
@@ -165,6 +169,25 @@ function HomeContent() {
   }
 
   const openFile = (fileName: string, fileType: string, mediaUrl?: string) => {
+    // If it's a music file, open iPod instead of the old player
+    if (fileType === "music" && mediaUrl) {
+      const newWindow = {
+        id: `ipod-${Date.now()}`,
+        type: "ipod" as const,
+        title: "iPod",
+        zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
+        fileName,
+        fileType,
+        audioUrl: mediaUrl,
+        isMaximized: false,
+        isMinimized: false,
+        savedSize: { width: 320, height: 580 },
+        savedPosition: { x: 150 + openWindows.length * 30, y: 50 + openWindows.length * 30 },
+      }
+      setOpenWindows([...openWindows, newWindow])
+      return
+    }
+
     const newWindow = {
       id: `file-${Date.now()}`,
       type: "file" as const,
@@ -221,7 +244,7 @@ function HomeContent() {
     <div className="relative w-full h-screen bg-black overflow-hidden">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
         <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
-          BETA 1.1
+          BETA 1.2
         </div>
       </div>
 
