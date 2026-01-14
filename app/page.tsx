@@ -81,7 +81,7 @@ function HomeContent() {
   const [openWindows, setOpenWindows] = useState<
     Array<{
       id: string
-      type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file" | "ipod"
+      type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file" | "ejpod"
       title: string
       zIndex: number
       fileName?: string
@@ -105,7 +105,7 @@ function HomeContent() {
   }, [])
 
   const openApplication = (
-    type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ipod",
+    type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ejpod",
     initialUrl?: string,
   ) => {
     const newWindow = {
@@ -130,7 +130,7 @@ function HomeContent() {
                         ? "Paint"
                         : type === "settings"
                           ? "Ajustes"
-                          : type === "ipod"
+                          : type === "ejpod"
                             ? "EjPod"
                             : "Snake",
       zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
@@ -148,7 +148,7 @@ function HomeContent() {
                 ? { width: 900, height: 700 }
                 : type === "settings"
                   ? { width: 800, height: 600 }
-                  : type === "ipod"
+                  : type === "ejpod"
                     ? { width: 320, height: 580 }
                     : { width: 900, height: 600 },
       savedPosition: { x: 100 + openWindows.length * 30, y: 100 + openWindows.length * 30 },
@@ -169,12 +169,12 @@ function HomeContent() {
   }
 
   const openFile = (fileName: string, fileType: string, mediaUrl?: string) => {
-    // If it's a music file, open iPod instead of the old player
+    // If it's a music file, open EjPod instead of the old player
     if (fileType === "music" && mediaUrl) {
       const newWindow = {
-        id: `ipod-${Date.now()}`,
-        type: "ipod" as const,
-        title: "iPod",
+        id: `ejpod-${Date.now()}`,
+        type: "ejpod" as const,
+        title: "EjPod",
         zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
         fileName,
         fileType,
@@ -255,7 +255,7 @@ function HomeContent() {
       <div className="relative z-10 w-full h-full flex flex-col">
         {/* Desktop area */}
         <div className="flex-1 overflow-hidden relative">
-          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} onOpenEjPod={() => openApplication("ipod")} />
+          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} onOpenEjPod={() => openApplication("ejpod")} />
 
           {/* Windows */}
           <WindowManager

@@ -21,7 +21,7 @@ export function ChangelogModal({ onClose }: { onClose: () => void }) {
             <ul className="space-y-2 text-sm text-zinc-300">
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>Nuevo reproductor de música estilo iPod clásico</span>
+                <span>Nuevo reproductor de música EjPod</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
@@ -41,7 +41,7 @@ export function ChangelogModal({ onClose }: { onClose: () => void }) {
             <ul className="space-y-2 text-sm text-zinc-300">
               <li className="flex items-start gap-2">
                 <span className="text-emerald-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>Interfaz iPod con pantalla y rueda de control</span>
+                <span>Interfaz EjPod con pantalla y rueda de control</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
