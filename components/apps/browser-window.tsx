@@ -39,7 +39,13 @@ interface BrowserWindowProps {
 }
 
 export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
-  const [tabs, setTabs] = useState<Tab[]>([{ id: "1", title: "Nueva pestaña", url: "about:blank" }])
+  const [tabs, setTabs] = useState<Tab[]>(() => {
+    // Initialize with the initial URL if provided
+    if (initialUrl) {
+      return [{ id: "1", title: initialUrl, url: "loading" }]
+    }
+    return [{ id: "1", title: "Nueva pestaña", url: "about:blank" }]
+  })
   const [activeTabId, setActiveTabId] = useState("1")
   const [inputUrl, setInputUrl] = useState("")
   const [draggedTabId, setDraggedTabId] = useState<string | null>(null)
@@ -54,7 +60,8 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
   const [canGoBack, setCanGoBack] = useState(false)
   const [canGoForward, setCanGoForward] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [originalUrl, setOriginalUrl] = useState<string>("")
+  const [originalUrl, setOriginalUrl] = useState<string>(initialUrl || "")
+  const [hasLoadedInitialUrl, setHasLoadedInitialUrl] = useState(false)
   const blockedDomains = [
     "google.com",
     "youtube.com",
@@ -71,28 +78,19 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
     "microsoft.com",
   ]
 
+  // Load initial URL on mount
   useEffect(() => {
-    if (initialUrl) {
-      navigateToUrl(initialUrl)
+    if (initialUrl && !hasLoadedInitialUrl) {
+      setHasLoadedInitialUrl(true)
+      // Small delay to ensure component is mounted
+      const timer = setTimeout(() => {
+        processAndNavigate(initialUrl, "1")
+      }, 100)
+      return () => clearTimeout(timer)
     }
-  }, [initialUrl])
+  }, [initialUrl, hasLoadedInitialUrl])
 
-  const activeTab = tabs.find((tab) => tab.id === activeTabId)
-
-  const isLikelyBlocked = (url: string): boolean => {
-    const lowerUrl = url.toLowerCase()
-    return blockedDomains.some((domain) => lowerUrl.includes(domain))
-  }
-
-  const handleUrlChange = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (inputUrl.trim()) {
-      navigateToUrl(inputUrl.trim())
-      setInputUrl("")
-    }
-  }
-
-  const navigateToUrl = (input: string) => {
+  const processAndNavigate = (input: string, tabId: string) => {
     setLoadError(null)
 
     let urlToLoad = input
@@ -111,7 +109,7 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
       setLoadError(
         `Este sitio (${new URL(urlToLoad).hostname}) bloquea ser cargado por razones de seguridad. Muchos sitios importantes como Google, X, Facebook, etc. no permiten ser mostrados en iframes o proxies.`,
       )
-      setTabs(tabs.map((tab) => (tab.id === activeTabId ? { ...tab, url: "blocked", title: input } : tab)))
+      setTabs(prevTabs => prevTabs.map((tab) => (tab.id === tabId ? { ...tab, url: "blocked", title: input } : tab)))
       return
     }
 
@@ -119,11 +117,30 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
 
     const title = input
 
-    setTabs(tabs.map((tab) => (tab.id === activeTabId ? { ...tab, url: proxiedUrl, title } : tab)))
+    setTabs(prevTabs => prevTabs.map((tab) => (tab.id === tabId ? { ...tab, url: proxiedUrl, title } : tab)))
 
     const now = new Date()
     const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
     setHistory((prev) => [{ title, url: urlToLoad, time: timeStr }, ...prev.slice(0, 49)])
+  }
+
+  const activeTab = tabs.find((tab) => tab.id === activeTabId)
+
+  const isLikelyBlocked = (url: string): boolean => {
+    const lowerUrl = url.toLowerCase()
+    return blockedDomains.some((domain) => lowerUrl.includes(domain))
+  }
+
+  const handleUrlChange = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (inputUrl.trim()) {
+      navigateToUrl(inputUrl.trim())
+      setInputUrl("")
+    }
+  }
+
+  const navigateToUrl = (input: string) => {
+    processAndNavigate(input, activeTabId)
   }
 
   const handleGoBack = () => {
@@ -360,7 +377,14 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
       )}
 
       <div className="flex-1 overflow-hidden bg-white relative">
-        {activeTab && activeTab.url === "blocked" && loadError ? (
+        {activeTab && activeTab.url === "loading" ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center z-10">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-white/80 text-sm">Cargando...</p>
+            </div>
+          </div>
+        ) : activeTab && activeTab.url === "blocked" && loadError ? (
           <div className="absolute inset-0 bg-white flex items-center justify-center z-10">
             <div className="text-center max-w-2xl px-6">
               <AlertTriangle className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
