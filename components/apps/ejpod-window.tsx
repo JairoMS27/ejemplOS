@@ -9,7 +9,7 @@ interface Track {
   audioUrl: string
 }
 
-interface IPodWindowProps {
+interface EjPodWindowProps {
   isMaximized?: boolean
   windowId?: string
   initialTrack?: {
@@ -24,7 +24,7 @@ interface IPodWindowProps {
   onPositionChange?: (position: { x: number; y: number }) => void
 }
 
-export function IPodWindow({ isMaximized, windowId, initialTrack, onClose, onMinimize, onFocus, zIndex = 1, savedPosition, onPositionChange }: IPodWindowProps) {
+export function EjPodWindow({ isMaximized, windowId, initialTrack, onClose, onMinimize, onFocus, zIndex = 1, savedPosition, onPositionChange }: EjPodWindowProps) {
   const audio = useAudio()
   const [position, setPosition] = useState(savedPosition || { x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
@@ -413,7 +413,7 @@ export function IPodWindow({ isMaximized, windowId, initialTrack, onClose, onMin
       }}
       onMouseDown={() => onFocus?.()}
     >
-      {/* iPod Body */}
+      {/* EjPod Body */}
       <div className="relative w-[280px] bg-gradient-to-b from-zinc-200 to-zinc-400 rounded-[2rem] shadow-2xl border border-zinc-300 flex flex-col overflow-hidden">
 
         {/* Window Controls - Draggable area */}
@@ -576,7 +576,7 @@ export function IPodWindow({ isMaximized, windowId, initialTrack, onClose, onMin
           </div>
         </div>
 
-        {/* iPod label */}
+        {/* EjPod label */}
         <div className="text-center mb-2">
           <span className="text-zinc-600 text-[10px] font-medium tracking-widest">EjPod</span>
         </div>

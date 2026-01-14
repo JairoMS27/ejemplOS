@@ -20,7 +20,7 @@ import {
 import { useAudio } from "@/lib/audio-context"
 
 interface TaskBarProps {
-  onAppClick: (app: "browser" | "games" | "finder" | "paint" | "settings" | "ipod") => void
+  onAppClick: (app: "browser" | "games" | "finder" | "paint" | "settings" | "ejpod") => void
   minimizedWindows?: Array<{ id: string; title: string }>
   onRestoreWindow?: (id: string) => void
 }
@@ -66,7 +66,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
   const apps = [
     { id: "browser", icon: Globe, label: "Navegador", type: "browser" as const },
     { id: "finder", icon: Folder, label: "Finder", type: "finder" as const },
-    { id: "ipod", icon: Music, label: "EjPod", type: "ipod" as const },
+    { id: "ejpod", icon: Music, label: "EjPod", type: "ejpod" as const },
     { id: "paint", icon: Palette, label: "Paint", type: "paint" as const },
     { id: "games", icon: Gamepad2, label: "Juegos", type: "games" as const },
     { id: "settings", icon: Settings, label: "Ajustes", type: "settings" as const },

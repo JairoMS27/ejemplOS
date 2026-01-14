@@ -11,11 +11,11 @@ import { PaintWindow } from "./apps/paint-window"
 import { SnakeWindow } from "./apps/snake-window"
 import { SettingsWindow } from "./apps/settings-window"
 import { ProjectsFolder } from "./apps/projects-folder"
-import { IPodWindow } from "./apps/ipod-window"
+import { EjPodWindow } from "./apps/ejpod-window"
 
 interface OpenWindow {
   id: string
-  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ipod"
+  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ejpod"
   title: string
   zIndex: number
   fileName?: string
@@ -57,11 +57,11 @@ export function WindowManager({
   return (
     <>
       {windows.map((window) => {
-        // iPod renders as its own window without the standard Window wrapper
-        if (window.type === "ipod") {
+        // EjPod renders as its own window without the standard Window wrapper
+        if (window.type === "ejpod") {
           if (window.isMinimized) return null
           return (
-            <IPodWindow
+            <EjPodWindow
               key={window.id}
               isMaximized={window.isMaximized}
               windowId={window.id}
