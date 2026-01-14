@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Search,
   ChevronLeft,
@@ -13,19 +13,27 @@ import {
   Star,
   Clock,
   Home,
-  AlertTriangle,
+  Globe,
   ExternalLink,
+  Shield,
+  Zap,
+  Bookmark,
+  Lock,
 } from "lucide-react"
 
 interface Tab {
   id: string
   title: string
   url: string
+  favicon?: string
+  isLoading?: boolean
+  error?: string
 }
 
 interface Bookmark {
   name: string
   url: string
+  icon?: string
 }
 
 interface HistoryItem {
@@ -39,168 +47,147 @@ interface BrowserWindowProps {
 }
 
 export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
-  const [tabs, setTabs] = useState<Tab[]>(() => {
-    // Initialize with the initial URL if provided
-    if (initialUrl) {
-      return [{ id: "1", title: initialUrl, url: "loading" }]
-    }
-    return [{ id: "1", title: "Nueva pestaña", url: "about:blank" }]
-  })
+  const [tabs, setTabs] = useState<Tab[]>([])
   const [activeTabId, setActiveTabId] = useState("1")
   const [inputUrl, setInputUrl] = useState("")
   const [draggedTabId, setDraggedTabId] = useState<string | null>(null)
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([
-    { name: "DuckDuckGo", url: "https://duckduckgo.com" },
-    { name: "Wikipedia", url: "https://wikipedia.org" },
-    { name: "GitHub", url: "https://github.com" },
+    { name: "DuckDuckGo", url: "https://duckduckgo.com", icon: "🦆" },
+    { name: "Wikipedia", url: "https://wikipedia.org", icon: "📚" },
+    { name: "GitHub", url: "https://github.com", icon: "🐙" },
+    { name: "Reddit", url: "https://reddit.com", icon: "🔴" },
+    { name: "Stack Overflow", url: "https://stackoverflow.com", icon: "📝" },
+    { name: "MDN Docs", url: "https://developer.mozilla.org", icon: "📖" },
   ])
   const [history, setHistory] = useState<HistoryItem[]>([])
-  const [showBookmarks, setShowBookmarks] = useState(false)
-  const [showHistory, setShowHistory] = useState(false)
-  const [canGoBack, setCanGoBack] = useState(false)
-  const [canGoForward, setCanGoForward] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [originalUrl, setOriginalUrl] = useState<string>(initialUrl || "")
-  const [hasLoadedInitialUrl, setHasLoadedInitialUrl] = useState(false)
-  const blockedDomains = [
-    "google.com",
-    "youtube.com",
-    "facebook.com",
-    "twitter.com",
-    "x.com",
-    "instagram.com",
-    "linkedin.com",
-    "netflix.com",
-    "amazon.com",
-    "paypal.com",
-    "bank",
-    "apple.com",
-    "microsoft.com",
-  ]
+  const [showPanel, setShowPanel] = useState<"bookmarks" | "history" | null>(null)
+  const [hasInitialized, setHasInitialized] = useState(false)
+  const iframeRefs = useRef<Map<string, HTMLIFrameElement>>(new Map())
 
-  // Load initial URL on mount
+  // Initialize tabs on mount
   useEffect(() => {
-    if (initialUrl && !hasLoadedInitialUrl) {
-      setHasLoadedInitialUrl(true)
-      // Small delay to ensure component is mounted
-      const timer = setTimeout(() => {
-        processAndNavigate(initialUrl, "1")
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [initialUrl, hasLoadedInitialUrl])
-
-  const processAndNavigate = (input: string, tabId: string) => {
-    setLoadError(null)
-
-    let urlToLoad = input
-
-    if (!urlToLoad.includes(".") || urlToLoad.includes(" ")) {
-      urlToLoad = `https://duckduckgo.com/?q=${encodeURIComponent(urlToLoad)}`
-    } else {
-      if (!urlToLoad.startsWith("http://") && !urlToLoad.startsWith("https://")) {
-        urlToLoad = "https://" + urlToLoad
+    if (!hasInitialized) {
+      setHasInitialized(true)
+      if (initialUrl) {
+        const newTab = createTab(initialUrl)
+        setTabs([newTab])
+        setActiveTabId(newTab.id)
+        // Navigate after a small delay
+        setTimeout(() => {
+          navigateTab(newTab.id, initialUrl)
+        }, 50)
+      } else {
+        const homeTab = { id: "1", title: "Nueva pestaña", url: "home", isLoading: false }
+        setTabs([homeTab])
+        setActiveTabId("1")
       }
     }
+  }, [initialUrl, hasInitialized])
 
-    setOriginalUrl(urlToLoad)
-
-    if (isLikelyBlocked(urlToLoad)) {
-      setLoadError(
-        `Este sitio (${new URL(urlToLoad).hostname}) bloquea ser cargado por razones de seguridad. Muchos sitios importantes como Google, X, Facebook, etc. no permiten ser mostrados en iframes o proxies.`,
-      )
-      setTabs(prevTabs => prevTabs.map((tab) => (tab.id === tabId ? { ...tab, url: "blocked", title: input } : tab)))
-      return
-    }
-
-    const proxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlToLoad)}`
-
-    const title = input
-
-    setTabs(prevTabs => prevTabs.map((tab) => (tab.id === tabId ? { ...tab, url: proxiedUrl, title } : tab)))
-
-    const now = new Date()
-    const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
-    setHistory((prev) => [{ title, url: urlToLoad, time: timeStr }, ...prev.slice(0, 49)])
-  }
+  const createTab = (url?: string): Tab => ({
+    id: Math.random().toString(36).substr(2, 9),
+    title: url || "Nueva pestaña",
+    url: url ? "loading" : "home",
+    isLoading: !!url,
+  })
 
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
 
-  const isLikelyBlocked = (url: string): boolean => {
-    const lowerUrl = url.toLowerCase()
-    return blockedDomains.some((domain) => lowerUrl.includes(domain))
+  const navigateTab = (tabId: string, input: string) => {
+    let url = input.trim()
+
+    // Determine if it's a search or URL
+    const isSearch = !url.includes(".") || url.includes(" ")
+
+    if (isSearch) {
+      url = `https://duckduckgo.com/?q=${encodeURIComponent(url)}`
+    } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url
+    }
+
+    // Update tab state
+    setTabs(prev => prev.map(tab =>
+      tab.id === tabId
+        ? { ...tab, url, title: input, isLoading: true, error: undefined }
+        : tab
+    ))
+
+    // Add to history
+    const now = new Date()
+    const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
+    setHistory(prev => [{ title: input, url, time: timeStr }, ...prev.slice(0, 49)])
   }
 
-  const handleUrlChange = (e: React.FormEvent) => {
+  const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputUrl.trim()) {
-      navigateToUrl(inputUrl.trim())
+      navigateTab(activeTabId, inputUrl.trim())
       setInputUrl("")
     }
   }
 
-  const navigateToUrl = (input: string) => {
-    processAndNavigate(input, activeTabId)
+  const handleIframeLoad = (tabId: string) => {
+    setTabs(prev => prev.map(tab =>
+      tab.id === tabId ? { ...tab, isLoading: false } : tab
+    ))
   }
 
-  const handleGoBack = () => {
-    const iframe = document.querySelector(`iframe[data-tab="${activeTabId}"]`) as HTMLIFrameElement
-    if (iframe?.contentWindow) {
-      try {
-        iframe.contentWindow.history.back()
-      } catch (e) {
-        console.log("[v0] Go back")
-      }
-    }
-  }
-
-  const handleGoForward = () => {
-    const iframe = document.querySelector(`iframe[data-tab="${activeTabId}"]`) as HTMLIFrameElement
-    if (iframe?.contentWindow) {
-      try {
-        iframe.contentWindow.history.forward()
-      } catch (e) {
-        console.log("[v0] Go forward")
-      }
-    }
+  const handleIframeError = (tabId: string, errorMsg: string) => {
+    setTabs(prev => prev.map(tab =>
+      tab.id === tabId ? { ...tab, isLoading: false, error: errorMsg } : tab
+    ))
   }
 
   const handleRefresh = () => {
-    if (activeTab && activeTab.url !== "about:blank") {
-      if (originalUrl) {
-        navigateToUrl(originalUrl)
-      } else {
-        setLoadError(null)
-        const iframe = document.querySelector(`iframe[data-tab="${activeTabId}"]`) as HTMLIFrameElement
-        if (iframe) {
-          iframe.src = iframe.src
-        }
+    if (activeTab && activeTab.url !== "home") {
+      const iframe = iframeRefs.current.get(activeTabId)
+      if (iframe) {
+        setTabs(prev => prev.map(tab =>
+          tab.id === activeTabId ? { ...tab, isLoading: true, error: undefined } : tab
+        ))
+        iframe.src = iframe.src
       }
-    }
-  }
-
-  const handleAddBookmark = () => {
-    if (activeTab && activeTab.url !== "about:blank") {
-      setBookmarks((prev) => [...prev, { name: activeTab.title, url: activeTab.url }])
     }
   }
 
   const handleGoHome = () => {
-    setTabs(tabs.map((tab) => (tab.id === activeTabId ? { ...tab, url: "about:blank", title: "Nueva pestaña" } : tab)))
+    setTabs(prev => prev.map(tab =>
+      tab.id === activeTabId
+        ? { ...tab, url: "home", title: "Nueva pestaña", isLoading: false, error: undefined }
+        : tab
+    ))
   }
 
   const handleNewTab = () => {
-    const newId = Math.random().toString(36).substr(2, 9)
-    setTabs([...tabs, { id: newId, title: "Nueva pestaña", url: "about:blank" }])
-    setActiveTabId(newId)
+    const newTab = createTab()
+    setTabs(prev => [...prev, newTab])
+    setActiveTabId(newTab.id)
   }
 
-  const handleCloseTab = (id: string) => {
-    if (tabs.length === 1) return
-    const newTabs = tabs.filter((tab) => tab.id !== id)
+  const handleCloseTab = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    if (tabs.length === 1) {
+      setTabs([{ id: "1", title: "Nueva pestaña", url: "home", isLoading: false }])
+      setActiveTabId("1")
+      return
+    }
+
+    const newTabs = tabs.filter(tab => tab.id !== id)
     setTabs(newTabs)
+
     if (activeTabId === id) {
-      setActiveTabId(newTabs[0].id)
+      const currentIndex = tabs.findIndex(tab => tab.id === id)
+      const newActiveIndex = currentIndex > 0 ? currentIndex - 1 : 0
+      setActiveTabId(newTabs[newActiveIndex].id)
+    }
+  }
+
+  const handleAddBookmark = () => {
+    if (activeTab && activeTab.url !== "home") {
+      const exists = bookmarks.some(b => b.url === activeTab.url)
+      if (!exists) {
+        setBookmarks(prev => [...prev, { name: activeTab.title, url: activeTab.url, icon: "⭐" }])
+      }
     }
   }
 
@@ -218,8 +205,8 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
     e.preventDefault()
     if (!draggedTabId || draggedTabId === targetTabId) return
 
-    const draggedIndex = tabs.findIndex((tab) => tab.id === draggedTabId)
-    const targetIndex = tabs.findIndex((tab) => tab.id === targetTabId)
+    const draggedIndex = tabs.findIndex(tab => tab.id === draggedTabId)
+    const targetIndex = tabs.findIndex(tab => tab.id === targetTabId)
 
     const newTabs = [...tabs]
     const [draggedTab] = newTabs.splice(draggedIndex, 1)
@@ -229,10 +216,23 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
     setDraggedTabId(null)
   }
 
+  const openInNewWindow = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer")
+  }
+
+  const quickLinks = [
+    { name: "DuckDuckGo", url: "https://duckduckgo.com", icon: "🦆", color: "from-orange-500/20 to-red-500/20" },
+    { name: "Wikipedia", url: "https://wikipedia.org", icon: "📚", color: "from-gray-500/20 to-gray-600/20" },
+    { name: "GitHub", url: "https://github.com", icon: "🐙", color: "from-purple-500/20 to-pink-500/20" },
+    { name: "Reddit", url: "https://reddit.com", icon: "🔴", color: "from-orange-500/20 to-orange-600/20" },
+    { name: "Stack Overflow", url: "https://stackoverflow.com", icon: "📝", color: "from-amber-500/20 to-orange-500/20" },
+    { name: "MDN Docs", url: "https://developer.mozilla.org", icon: "📖", color: "from-blue-500/20 to-indigo-500/20" },
+  ]
+
   return (
-    <div className="w-full h-full flex flex-col bg-black">
-      {/* Tabs - scrollable on mobile */}
-      <div className="h-10 bg-black flex items-end gap-1 px-1 sm:px-2 overflow-x-auto pt-2 flex-shrink-0">
+    <div className="w-full h-full flex flex-col bg-[#0a0a0a] overflow-hidden">
+      {/* Tab Bar */}
+      <div className="h-10 bg-[#0a0a0a] flex items-end gap-0.5 px-2 pt-2 overflow-x-auto flex-shrink-0 scrollbar-hide">
         {tabs.map((tab) => (
           <div
             key={tab.id}
@@ -241,265 +241,292 @@ export function BrowserWindow({ initialUrl }: BrowserWindowProps) {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, tab.id)}
             onClick={() => setActiveTabId(tab.id)}
-            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-t-lg cursor-move transition-colors whitespace-nowrap text-xs sm:text-sm flex-shrink-0 ${
-              activeTabId === tab.id ? "bg-[#1a1a1a] text-white" : "bg-transparent text-white/60 hover:bg-white/5"
+            className={`group flex items-center gap-2 px-3 py-2 rounded-t-lg cursor-pointer transition-all duration-200 min-w-[120px] max-w-[200px] flex-shrink-0 ${
+              activeTabId === tab.id
+                ? "bg-[#1c1c1c] text-white border-t border-l border-r border-white/10"
+                : "bg-transparent text-white/50 hover:text-white/80 hover:bg-white/5"
             }`}
           >
-            <span className="max-w-20 sm:max-w-32 truncate">{tab.title}</span>
+            {tab.isLoading ? (
+              <div className="w-4 h-4 border-2 border-white/20 border-t-blue-400 rounded-full animate-spin flex-shrink-0" />
+            ) : tab.url === "home" ? (
+              <Home className="w-4 h-4 text-white/60 flex-shrink-0" />
+            ) : (
+              <Globe className="w-4 h-4 text-white/60 flex-shrink-0" />
+            )}
+            <span className="truncate text-sm flex-1">{tab.title}</span>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleCloseTab(tab.id)
-              }}
-              className="hover:bg-white/20 rounded p-0.5"
+              onClick={(e) => handleCloseTab(tab.id, e)}
+              className="opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-0.5 transition-opacity flex-shrink-0"
             >
-              <X className="w-3 h-3" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
         <button
           onClick={handleNewTab}
-          className="mb-1 ml-1 p-1 hover:bg-white/10 rounded text-white/60 transition-colors flex-shrink-0"
+          className="p-2 hover:bg-white/10 rounded-lg text-white/40 hover:text-white/80 transition-all flex-shrink-0 mb-0.5"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Navigation bar */}
-      <div className="h-12 bg-[#1a1a1a] border-b border-white/10 px-2 sm:px-4 flex items-center gap-1 sm:gap-3 flex-shrink-0">
-        <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
+      {/* URL Bar */}
+      <div className="h-14 bg-[#1c1c1c] border-b border-white/5 px-3 flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
-            onClick={handleGoBack}
-            disabled={!canGoBack}
-            className="p-1 sm:p-1.5 hover:bg-white/10 rounded-full transition-colors disabled:opacity-30"
+            onClick={handleGoHome}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            title="Inicio"
           >
-            <ChevronLeft className="w-4 h-4 text-white/80" />
+            <Home className="w-4 h-4 text-white/60" />
           </button>
           <button
-            onClick={handleGoForward}
-            disabled={!canGoForward}
-            className="p-1 sm:p-1.5 hover:bg-white/10 rounded-full transition-colors disabled:opacity-30"
+            onClick={handleRefresh}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            title="Recargar"
           >
-            <ChevronRight className="w-4 h-4 text-white/80" />
-          </button>
-          <button onClick={handleRefresh} className="p-1 sm:p-1.5 hover:bg-white/10 rounded-full transition-colors">
-            <RotateCw className="w-3.5 h-3.5 text-white/80" />
-          </button>
-          <button onClick={handleGoHome} className="hidden sm:block p-1.5 hover:bg-white/10 rounded-full transition-colors">
-            <Home className="w-4 h-4 text-white/80" />
+            <RotateCw className={`w-4 h-4 text-white/60 ${activeTab?.isLoading ? "animate-spin" : ""}`} />
           </button>
         </div>
 
-        <form onSubmit={handleUrlChange} className="flex-1 flex items-center gap-2 min-w-0">
-          <div className="flex-1 bg-black/40 rounded-full px-2 sm:px-4 py-1.5 flex items-center gap-2 border border-white/5 focus-within:border-white/20 transition-colors">
-            <Search className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+        <form onSubmit={handleUrlSubmit} className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 bg-[#0a0a0a] rounded-xl px-4 py-2 border border-white/5 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all">
+            {activeTab?.url && activeTab.url !== "home" && activeTab.url.startsWith("https") && (
+              <Lock className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+            )}
+            <Search className="w-4 h-4 text-white/30 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Buscar o URL..."
+              placeholder="Buscar en DuckDuckGo o ingresar URL..."
               value={inputUrl}
               onChange={(e) => setInputUrl(e.target.value)}
-              className="flex-1 bg-transparent text-xs sm:text-sm text-white outline-none placeholder-white/40 min-w-0"
+              className="flex-1 bg-transparent text-sm text-white outline-none placeholder-white/30 min-w-0"
             />
           </div>
         </form>
 
-        <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={handleAddBookmark}
-            className="hidden sm:block p-1.5 hover:bg-white/10 rounded-full transition-colors"
-            title="Agregar marcador"
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            title="Agregar a marcadores"
           >
-            <Star className="w-4 h-4 text-white/60" />
+            <Star className={`w-4 h-4 ${activeTab && bookmarks.some(b => b.url === activeTab.url) ? "text-yellow-400 fill-yellow-400" : "text-white/60"}`} />
           </button>
           <button
-            onClick={() => {
-              setShowBookmarks(!showBookmarks)
-              setShowHistory(false)
-            }}
-            className={`p-1 sm:p-1.5 rounded-full transition-colors ${showBookmarks ? "bg-white/20" : "hover:bg-white/10"}`}
+            onClick={() => setShowPanel(showPanel === "bookmarks" ? null : "bookmarks")}
+            className={`p-2 rounded-lg transition-colors ${showPanel === "bookmarks" ? "bg-white/20 text-white" : "hover:bg-white/10 text-white/60"}`}
             title="Marcadores"
           >
-            <Star className="w-4 h-4 text-white/60" />
+            <Bookmark className="w-4 h-4" />
           </button>
           <button
-            onClick={() => {
-              setShowHistory(!showHistory)
-              setShowBookmarks(false)
-            }}
-            className={`p-1 sm:p-1.5 rounded-full transition-colors ${showHistory ? "bg-white/20" : "hover:bg-white/10"}`}
+            onClick={() => setShowPanel(showPanel === "history" ? null : "history")}
+            className={`p-2 rounded-lg transition-colors ${showPanel === "history" ? "bg-white/20 text-white" : "hover:bg-white/10 text-white/60"}`}
             title="Historial"
           >
-            <Clock className="w-4 h-4 text-white/60" />
+            <Clock className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {(showBookmarks || showHistory) && (
-        <div className="bg-white/10 border-b border-white/20 p-2 sm:p-4 max-h-48 overflow-y-auto flex-shrink-0">
-          {showBookmarks && (
+      {/* Bookmarks/History Panel */}
+      {showPanel && (
+        <div className="bg-[#151515] border-b border-white/5 p-4 max-h-60 overflow-y-auto flex-shrink-0 animate-in slide-in-from-top-2 duration-200">
+          {showPanel === "bookmarks" && (
             <div>
-              <h3 className="text-white text-sm font-semibold mb-2">Marcadores</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <h3 className="text-white/80 text-sm font-semibold mb-3 flex items-center gap-2">
+                <Star className="w-4 h-4 text-yellow-400" />
+                Marcadores
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                 {bookmarks.map((bookmark, idx) => (
                   <button
                     key={idx}
-                    onClick={() => navigateToUrl(bookmark.url)}
-                    className="px-2 sm:px-3 py-2 bg-white/5 hover:bg-white/10 rounded text-left text-xs sm:text-sm text-white/80 truncate"
+                    onClick={() => {
+                      navigateTab(activeTabId, bookmark.url)
+                      setShowPanel(null)
+                    }}
+                    className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-left text-sm text-white/70 hover:text-white truncate transition-colors flex items-center gap-2"
                   >
-                    {bookmark.name}
+                    <span>{bookmark.icon || "🔗"}</span>
+                    <span className="truncate">{bookmark.name}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
-          {showHistory && (
+          {showPanel === "history" && (
             <div>
-              <h3 className="text-white text-sm font-semibold mb-2">Historial</h3>
-              <div className="space-y-1">
-                {history.length === 0 ? (
-                  <p className="text-white/40 text-sm">Sin historial</p>
-                ) : (
-                  history.map((item, idx) => (
+              <h3 className="text-white/80 text-sm font-semibold mb-3 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-400" />
+                Historial reciente
+              </h3>
+              {history.length === 0 ? (
+                <p className="text-white/30 text-sm">Sin historial todavía</p>
+              ) : (
+                <div className="space-y-1">
+                  {history.slice(0, 10).map((item, idx) => (
                     <button
                       key={idx}
-                      onClick={() => navigateToUrl(item.url)}
-                      className="w-full px-3 py-2 bg-white/5 hover:bg-white/10 rounded text-left flex items-center gap-3"
+                      onClick={() => {
+                        navigateTab(activeTabId, item.url)
+                        setShowPanel(null)
+                      }}
+                      className="w-full px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-left flex items-center gap-3 transition-colors"
                     >
-                      <span className="text-white/40 text-xs">{item.time}</span>
-                      <span className="flex-1 text-white/80 text-sm truncate">{item.title}</span>
+                      <span className="text-white/30 text-xs font-mono">{item.time}</span>
+                      <span className="flex-1 text-white/70 text-sm truncate">{item.title}</span>
                     </button>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
-      <div className="flex-1 overflow-hidden bg-white relative">
-        {activeTab && activeTab.url === "loading" ? (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center z-10">
-            <div className="text-center">
-              <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-white/80 text-sm">Cargando...</p>
-            </div>
-          </div>
-        ) : activeTab && activeTab.url === "blocked" && loadError ? (
-          <div className="absolute inset-0 bg-white flex items-center justify-center z-10">
-            <div className="text-center max-w-2xl px-6">
-              <AlertTriangle className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Sitio bloqueado</h2>
-              <p className="text-gray-700 mb-6 leading-relaxed">{loadError}</p>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-blue-900 mb-3 font-medium">
-                  Sitios que típicamente no funcionan en navegadores embebidos:
-                </p>
-                <div className="grid grid-cols-2 gap-2 text-sm text-blue-800">
-                  <div>• Google y servicios de Google</div>
-                  <div>• X (Twitter)</div>
-                  <div>• Facebook e Instagram</div>
-                  <div>• LinkedIn</div>
-                  <div>• YouTube</div>
-                  <div>• Netflix</div>
-                  <div>• Sitios bancarios</div>
-                  <div>• Amazon y PayPal</div>
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-center">
-                <button
-                  onClick={() => window.open(originalUrl, "_blank")}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Abrir en navegador real
-                </button>
-                <button
-                  onClick={handleGoHome}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                >
-                  Volver al inicio
-                </button>
-              </div>
-
-              <p className="text-xs text-gray-500 mt-6">
-                Sitios como Wikipedia, GitHub, DuckDuckGo y la mayoría de blogs funcionan correctamente
-              </p>
-            </div>
-          </div>
-        ) : activeTab && activeTab.url !== "about:blank" ? (
-          <>
-            {loadError && activeTab.url !== "blocked" && (
-              <div className="absolute inset-0 bg-white flex items-center justify-center z-10">
-                <div className="text-center max-w-md px-4">
-                  <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">No se pudo cargar la página</h2>
-                  <p className="text-gray-600 mb-4">{loadError}</p>
-                  <div className="flex gap-3 justify-center">
-                    <button
-                      onClick={handleRefresh}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Reintentar
-                    </button>
-                    <button
-                      onClick={() => window.open(originalUrl, "_blank")}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Abrir en navegador real
-                    </button>
+      {/* Content Area */}
+      <div className="flex-1 relative overflow-hidden">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            className={`absolute inset-0 ${tab.id === activeTabId ? "z-10" : "z-0 invisible"}`}
+          >
+            {tab.url === "home" ? (
+              // Home Page
+              <div className="w-full h-full bg-gradient-to-b from-[#0a0a0a] to-[#111] flex flex-col items-center justify-center p-6 overflow-auto">
+                <div className="max-w-3xl w-full text-center">
+                  {/* Logo */}
+                  <div className="mb-8">
+                    <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/20 mb-4">
+                      <Globe className="w-10 h-10 text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-white mb-2">EjemplOS Browser</h1>
+                    <p className="text-white/40 text-sm">Navega por la web de forma rápida y segura</p>
                   </div>
+
+                  {/* Search Box */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      const formData = new FormData(e.currentTarget)
+                      const query = formData.get("search") as string
+                      if (query?.trim()) {
+                        navigateTab(activeTabId, query.trim())
+                      }
+                    }}
+                    className="mb-10"
+                  >
+                    <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-5 py-4 border border-white/10 focus-within:border-blue-500/50 focus-within:bg-white/10 transition-all max-w-xl mx-auto">
+                      <Search className="w-5 h-5 text-white/30" />
+                      <input
+                        type="text"
+                        name="search"
+                        placeholder="Buscar en la web..."
+                        className="flex-1 bg-transparent text-white outline-none placeholder-white/30"
+                        autoComplete="off"
+                      />
+                    </div>
+                  </form>
+
+                  {/* Quick Links */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-10">
+                    {quickLinks.map((link, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => navigateTab(activeTabId, link.url)}
+                        className={`group p-4 bg-gradient-to-br ${link.color} hover:scale-[1.02] rounded-xl border border-white/5 hover:border-white/10 transition-all duration-200`}
+                      >
+                        <div className="text-3xl mb-2">{link.icon}</div>
+                        <p className="text-white/80 text-sm font-medium group-hover:text-white transition-colors">{link.name}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Info Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+                    <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                      <Zap className="w-5 h-5 text-yellow-400 mb-2" />
+                      <h3 className="text-white/80 text-sm font-medium mb-1">Rápido</h3>
+                      <p className="text-white/40 text-xs">Carga instantánea de sitios web</p>
+                    </div>
+                    <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                      <Shield className="w-5 h-5 text-green-400 mb-2" />
+                      <h3 className="text-white/80 text-sm font-medium mb-1">Seguro</h3>
+                      <p className="text-white/40 text-xs">Conexiones HTTPS protegidas</p>
+                    </div>
+                    <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                      <Globe className="w-5 h-5 text-blue-400 mb-2" />
+                      <h3 className="text-white/80 text-sm font-medium mb-1">Abierto</h3>
+                      <p className="text-white/40 text-xs">Accede a millones de sitios</p>
+                    </div>
+                  </div>
+
+                  {/* Note */}
+                  <p className="text-white/20 text-xs mt-8">
+                    Nota: Algunos sitios pueden no cargar debido a restricciones de seguridad (X-Frame-Options)
+                  </p>
                 </div>
+              </div>
+            ) : (
+              // Web Content
+              <div className="w-full h-full relative bg-white">
+                {/* Loading Overlay */}
+                {tab.isLoading && (
+                  <div className="absolute inset-0 bg-[#0a0a0a] flex items-center justify-center z-20">
+                    <div className="text-center">
+                      <div className="w-12 h-12 border-3 border-white/10 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-white/60 text-sm">Cargando página...</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error State */}
+                {tab.error && (
+                  <div className="absolute inset-0 bg-[#0a0a0a] flex items-center justify-center z-20">
+                    <div className="text-center max-w-md px-6">
+                      <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Shield className="w-8 h-8 text-red-400" />
+                      </div>
+                      <h2 className="text-xl font-bold text-white mb-2">No se pudo cargar</h2>
+                      <p className="text-white/50 text-sm mb-6">{tab.error}</p>
+                      <div className="flex gap-3 justify-center">
+                        <button
+                          onClick={() => openInNewWindow(tab.url)}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Abrir en navegador
+                        </button>
+                        <button
+                          onClick={handleGoHome}
+                          className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
+                        >
+                          Volver al inicio
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Iframe */}
+                <iframe
+                  ref={(el) => {
+                    if (el) iframeRefs.current.set(tab.id, el)
+                  }}
+                  src={tab.url}
+                  className="w-full h-full border-none"
+                  title={tab.title}
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-pointer-lock"
+                  onLoad={() => handleIframeLoad(tab.id)}
+                  onError={() => handleIframeError(tab.id, "Este sitio no permite ser mostrado en un iframe embebido.")}
+                />
               </div>
             )}
-            <iframe
-              key={activeTab.id}
-              data-tab={activeTab.id}
-              src={activeTab.url}
-              className="w-full h-full border-none"
-              title={activeTab.title}
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-pointer-lock allow-modals"
-              onError={() =>
-                setLoadError("Error al cargar el sitio. Puede que este sitio no permita ser mostrado en iframes.")
-              }
-            />
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-black overflow-auto">
-            <div className="text-center max-w-2xl px-4 py-6">
-              <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">EjemplOS Browser</h1>
-              <p className="text-white/60 mb-4 sm:mb-8 text-sm sm:text-base">
-                Ingresa una URL o búsqueda en la barra superior para navegar por la web
-              </p>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-8">
-                {bookmarks.slice(0, 6).map((bookmark, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => navigateToUrl(bookmark.url)}
-                    className="p-3 sm:p-6 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
-                  >
-                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                      <span className="text-lg sm:text-2xl text-white">{bookmark.name[0]}</span>
-                    </div>
-                    <p className="text-white/80 text-xs sm:text-sm font-medium truncate">{bookmark.name}</p>
-                  </button>
-                ))}
-              </div>
-
-              <div className="bg-white/5 border border-white/10 rounded-lg p-3 sm:p-4 max-w-xl mx-auto">
-                <p className="text-xs sm:text-sm text-white/60 mb-2">
-                  Nota: Algunos sitios como Google, X, Facebook, etc. no permiten ser cargados por razones de seguridad.
-                </p>
-                <p className="text-[10px] sm:text-xs text-white/40">
-                  Funciona perfectamente con Wikipedia, GitHub, blogs y la mayoría de sitios web.
-                </p>
-              </div>
-            </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   )
