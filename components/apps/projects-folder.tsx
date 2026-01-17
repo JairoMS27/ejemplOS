@@ -207,14 +207,9 @@ export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderPro
             Escritorio
           </span>
           <span className="text-zinc-600 hidden sm:inline">/</span>
-          <span
-            className="hover:text-white cursor-pointer transition-colors hidden sm:inline"
-            onClick={() => navigateTo("Todos")}
-          >
+          <span className="text-white hidden sm:inline">
             Mis Proyectos
           </span>
-          <span className="text-zinc-600 hidden sm:inline">/</span>
-          <span className="text-white truncate">{currentPath}</span>
         </div>
 
         <div className="flex-1" />

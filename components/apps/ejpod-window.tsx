@@ -26,6 +26,7 @@ interface EjPodWindowProps {
 
 export function EjPodWindow({ isMaximized, windowId, initialTrack, onClose, onMinimize, onFocus, zIndex = 1, savedPosition, onPositionChange }: EjPodWindowProps) {
   const audio = useAudio()
+  const audioRef = useRef(audio)
   const [position, setPosition] = useState(savedPosition || { x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
@@ -39,14 +40,18 @@ export function EjPodWindow({ isMaximized, windowId, initialTrack, onClose, onMi
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
   const audioElementRef = useRef<HTMLAudioElement | null>(null)
 
+  // Keep audioRef updated
+  useEffect(() => {
+    audioRef.current = audio
+  }, [audio])
+
   // Cleanup: stop audio when component unmounts
   useEffect(() => {
-    const currentWindowId = windowId
     return () => {
-      // Always stop audio when this EjPod window closes
-      audio.stop()
+      // Stop audio when this EjPod window closes
+      audioRef.current.stop()
     }
-  }, [windowId, audio])
+  }, [])
 
   // Load tracks from Música folder
   useEffect(() => {
