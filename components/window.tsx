@@ -65,7 +65,7 @@ export function Window({
   const [isResizing, setIsResizing] = useState(false)
   const [resizeDirection, setResizeDirection] = useState('')
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 })
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0, posX: 0, posY: 0 })
   const windowRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -95,29 +95,31 @@ export function Window({
         const deltaX = e.clientX - resizeStart.x
         const deltaY = e.clientY - resizeStart.y
 
-        let newWidth = size.width
-        let newHeight = size.height
-        let newX = position.x
-        let newY = position.y
+        let newWidth = resizeStart.width
+        let newHeight = resizeStart.height
+        let newX = resizeStart.posX
+        let newY = resizeStart.posY
 
         if (resizeDirection.includes('e')) {
           newWidth = Math.max(400, resizeStart.width + deltaX)
         }
         if (resizeDirection.includes('w')) {
-          newWidth = Math.max(400, resizeStart.width - deltaX)
-          newX = position.x + (size.width - newWidth)
+          const proposedWidth = resizeStart.width - deltaX
+          newWidth = Math.max(400, proposedWidth)
+          newX = resizeStart.posX + resizeStart.width - newWidth
         }
         if (resizeDirection.includes('s')) {
           newHeight = Math.max(300, resizeStart.height + deltaY)
         }
         if (resizeDirection.includes('n')) {
-          newHeight = Math.max(300, resizeStart.height - deltaY)
-          newY = position.y + (size.height - newHeight)
+          const proposedHeight = resizeStart.height - deltaY
+          newHeight = Math.max(300, proposedHeight)
+          newY = resizeStart.posY + resizeStart.height - newHeight
         }
 
         const newSize = { width: newWidth, height: newHeight }
         const newPosition = { x: newX, y: newY }
-        
+
         setSize(newSize)
         setPosition(newPosition)
         onSizeChange?.(newSize)
@@ -157,6 +159,7 @@ export function Window({
   const handleResizeStart = (e: React.MouseEvent, direction: string) => {
     if (isMaximized || isMobile) return
     e.stopPropagation()
+    e.preventDefault()
     onFocus()
     setIsResizing(true)
     setResizeDirection(direction)
@@ -165,6 +168,8 @@ export function Window({
       y: e.clientY,
       width: size.width,
       height: size.height,
+      posX: position.x,
+      posY: position.y,
     })
   }
 
@@ -244,47 +249,48 @@ export function Window({
             style={{ height: isFullscreen ? 'calc(100% - 40px)' : `${size.height - 40}px` }}
           >
             {children}
-
-            {!isFullscreen && (
-              <>
-                {/* Bordes - más grandes para facilitar el redimensionamiento */}
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'n')}
-                  className="absolute top-0 left-3 right-3 h-2 cursor-ns-resize hover:bg-blue-500/20"
-                />
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 's')}
-                  className="absolute bottom-0 left-3 right-3 h-2 cursor-ns-resize hover:bg-blue-500/20"
-                />
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'e')}
-                  className="absolute top-3 right-0 bottom-3 w-2 cursor-ew-resize hover:bg-blue-500/20"
-                />
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'w')}
-                  className="absolute top-3 left-0 bottom-3 w-2 cursor-ew-resize hover:bg-blue-500/20"
-                />
-
-                {/* Esquinas - más grandes para facilitar el redimensionamiento */}
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'nw')}
-                  className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize hover:bg-blue-500/30"
-                />
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'ne')}
-                  className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize hover:bg-blue-500/30"
-                />
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'sw')}
-                  className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize hover:bg-blue-500/30"
-                />
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'se')}
-                  className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize hover:bg-blue-500/30"
-                />
-              </>
-            )}
           </div>
+
+          {/* Resize handles - outside content div for better accessibility */}
+          {!isFullscreen && (
+            <>
+              {/* Bordes */}
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 'n')}
+                className="absolute top-0 left-4 right-4 h-2 cursor-ns-resize z-50"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 's')}
+                className="absolute bottom-0 left-4 right-4 h-2 cursor-ns-resize z-50"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 'e')}
+                className="absolute top-4 right-0 bottom-4 w-2 cursor-ew-resize z-50"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 'w')}
+                className="absolute top-4 left-0 bottom-4 w-2 cursor-ew-resize z-50"
+              />
+
+              {/* Esquinas */}
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 'nw')}
+                className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize z-50"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 'ne')}
+                className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize z-50"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 'sw')}
+                className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize z-50"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, 'se')}
+                className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-50"
+              />
+            </>
+          )}
         </div>
       </ContextMenuTrigger>
       

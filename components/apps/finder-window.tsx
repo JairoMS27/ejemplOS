@@ -184,13 +184,6 @@ export function FinderWindow({
         modified: "Hoy",
       },
       {
-        name: "Finder",
-        type: "folder",
-        icon: <Folder className="w-10 h-10 text-zinc-400 fill-zinc-400/20" />,
-        size: "App",
-        modified: "Hoy",
-      },
-      {
         name: "EjPod",
         type: "app",
         appType: "ejpod",
