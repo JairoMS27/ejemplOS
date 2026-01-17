@@ -251,4 +251,28 @@ export const es = {
     games: "Juegos",
     search: "Buscar",
   },
+
+  // Changelog
+  changelog: {
+    title: "Novedades - EjemplOS v1.2.1",
+    bugFixes: "Correcciones de Bugs",
+    bugFixesList: {
+      audioStops: "El audio ahora se detiene correctamente al cerrar la ventana de musica",
+      windowResize: "Corregido el redimensionamiento de ventanas desde los bordes",
+      projectsNav: "Mejorada la navegacion en la carpeta Mis Proyectos",
+    },
+    qualityOfLife: "Mejoras de Calidad de Vida",
+    qualityOfLifeList: {
+      browserDesktop: "Navegador ahora disponible en el escritorio",
+      finderSidebar: "Sidebar del Finder actualizado con todas las aplicaciones",
+      desktopLocation: "Escritorio visible en ubicaciones del Finder",
+    },
+    uiImprovements: "Mejoras de Interfaz",
+    uiImprovementsList: {
+      navigationPaths: "Rutas de navegacion mas claras en carpetas",
+      selectionDesign: "Diseno de seleccion simplificado en Mis Proyectos",
+      consistentSidebar: "Sidebar consistente entre aplicaciones",
+    },
+    understood: "Entendido",
+  },
 }
