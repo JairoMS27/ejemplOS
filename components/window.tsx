@@ -8,6 +8,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { Maximize, Minimize, X, Move } from 'lucide-react'
+import { useI18n } from '@/lib/i18n-context'
 
 // Hook para detectar si estamos en móvil
 function useIsMobile() {
@@ -59,6 +60,7 @@ export function Window({
   children
 }: WindowProps) {
   const isMobile = useIsMobile()
+  const { t } = useI18n()
   const [size, setSize] = useState(savedSize || { width: 900, height: 600 })
   const [position, setPosition] = useState(savedPosition || { x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
@@ -219,7 +221,7 @@ export function Window({
                     onClose()
                   }}
                   className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"
-                  title="Cerrar"
+                  title={t.common.close}
                 />
                 <button
                   onClick={(e) => {
@@ -227,7 +229,7 @@ export function Window({
                     onMinimize?.()
                   }}
                   className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors"
-                  title="Minimizar"
+                  title={t.common.minimize}
                 />
                 <button
                   onClick={(e) => {
@@ -235,7 +237,7 @@ export function Window({
                     onMaximize?.()
                   }}
                   className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors"
-                  title={isMaximized ? "Restaurar" : "Maximizar"}
+                  title={isMaximized ? t.common.restore : t.common.maximize}
                 />
               </div>
               <span className="text-sm font-medium text-black/70">{title}</span>
@@ -298,15 +300,15 @@ export function Window({
       <ContextMenuContent className="w-48">
         <ContextMenuItem onClick={onMaximize}>
           <Maximize className="mr-2 h-4 w-4" />
-          {isMaximized ? 'Restaurar' : 'Maximizar'}
+          {isMaximized ? t.common.restore : t.common.maximize}
         </ContextMenuItem>
         <ContextMenuItem onClick={onMinimize}>
           <Minimize className="mr-2 h-4 w-4" />
-          Minimizar
+          {t.common.minimize}
         </ContextMenuItem>
         <ContextMenuItem onClick={onClose}>
           <X className="mr-2 h-4 w-4" />
-          Cerrar
+          {t.common.close}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

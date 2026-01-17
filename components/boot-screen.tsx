@@ -1,19 +1,21 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useI18n } from '@/lib/i18n-context'
 
 export function BootScreen() {
   const [text, setText] = useState<string[]>([])
   const [showLogo, setShowLogo] = useState(false)
+  const { t } = useI18n()
 
   useEffect(() => {
     const bootSequence = [
-      'Iniciando EjemplOS v1.2.1...',
-      'Cargando kernel...',
-      'Verificando sistema de archivos...',
-      'Montando volúmenes...',
-      'Iniciando interfaz gráfica...',
-      'Listo.'
+      t.boot.starting,
+      t.boot.loadingKernel,
+      t.boot.checkingFilesystem,
+      t.boot.mountingVolumes,
+      t.boot.startingGui,
+      t.boot.ready
     ]
 
     let currentIndex = 0

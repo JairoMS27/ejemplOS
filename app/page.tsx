@@ -8,6 +8,7 @@ import { BootScreen } from "@/components/boot-screen"
 import { ChangelogModal } from "@/components/changelog-modal"
 import { AudioProvider } from "@/lib/audio-context"
 import { SettingsProvider, useSettings } from "@/lib/settings-context"
+import { I18nProvider, useI18n } from "@/lib/i18n-context"
 
 function DesktopBackground() {
   const { settings } = useSettings()
@@ -76,6 +77,7 @@ function DesktopBackground() {
 }
 
 function HomeContent() {
+  const { t } = useI18n()
   const [booted, setBooted] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [openWindows, setOpenWindows] = useState<
@@ -105,6 +107,23 @@ function HomeContent() {
     return () => clearTimeout(timer)
   }, [])
 
+  const getWindowTitle = (type: string) => {
+    const titles: Record<string, string> = {
+      browser: t.windows.browser,
+      minesweeper: t.windows.minesweeper,
+      finder: t.windows.finder,
+      games: t.windows.games,
+      projects: t.windows.myProjects,
+      tetris: t.windows.tetris,
+      "2048": t.windows["2048"],
+      paint: t.windows.paint,
+      settings: t.windows.settings,
+      ejpod: t.windows.ejpod,
+      snake: t.windows.snake,
+    }
+    return titles[type] || type
+  }
+
   const openApplication = (
     type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ejpod",
     initialUrl?: string,
@@ -112,28 +131,7 @@ function HomeContent() {
     const newWindow = {
       id: `${type}-${Date.now()}`,
       type,
-      title:
-        type === "browser"
-          ? "Navegador"
-          : type === "minesweeper"
-            ? "Buscaminas"
-            : type === "finder"
-              ? "Finder"
-              : type === "games"
-                ? "Juegos"
-                : type === "projects"
-                  ? "Mis Proyectos"
-                  : type === "tetris"
-                    ? "Tetris"
-                    : type === "2048"
-                      ? "2048"
-                      : type === "paint"
-                        ? "Paint"
-                        : type === "settings"
-                          ? "Ajustes"
-                          : type === "ejpod"
-                            ? "EjPod"
-                            : "Snake",
+      title: getWindowTitle(type),
       zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
       initialUrl: initialUrl,
       isMaximized: false,
@@ -274,7 +272,7 @@ function HomeContent() {
           </span>
           <span className="text-white/50 text-xs">—</span>
           <span className="text-xs text-white/70 font-medium tracking-wide">
-            Work in Progress
+            {t.common.workInProgress}
           </span>
         </div>
       </div>
@@ -316,10 +314,12 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <SettingsProvider>
-      <AudioProvider>
-        <HomeContent />
-      </AudioProvider>
-    </SettingsProvider>
+    <I18nProvider>
+      <SettingsProvider>
+        <AudioProvider>
+          <HomeContent />
+        </AudioProvider>
+      </SettingsProvider>
+    </I18nProvider>
   )
 }
