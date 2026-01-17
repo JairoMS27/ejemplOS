@@ -23,6 +23,7 @@ interface OpenWindow {
   imageUrl?: string
   audioUrl?: string
   initialUrl?: string
+  initialPath?: string
   isMaximized?: boolean
   isMinimized?: boolean
   savedSize?: { width: number; height: number }
@@ -36,6 +37,7 @@ interface WindowManagerProps {
   onOpenFile?: (fileName: string, fileType: string, imageUrl?: string) => void
   onOpenGame?: (gameType: "minesweeper" | "tetris" | "2048" | "snake") => void
   onOpenApp?: (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => void
+  onOpenFinder?: (path?: string) => void
   onMinimize?: (id: string) => void
   onMaximize?: (id: string) => void
   onSizeChange?: (id: string, size: { width: number; height: number }) => void
@@ -49,6 +51,7 @@ export function WindowManager({
   onOpenFile,
   onOpenGame,
   onOpenApp,
+  onOpenFinder,
   onMinimize,
   onMaximize,
   onSizeChange,
@@ -103,6 +106,7 @@ export function WindowManager({
                 onOpenGame={onOpenGame}
                 onOpenApp={onOpenApp}
                 isMaximized={window.isMaximized}
+                initialPath={window.initialPath}
               />
             )}
             {window.type === "file" && (
@@ -130,6 +134,7 @@ export function WindowManager({
             {window.type === "projects" && (
               <ProjectsFolder
                 onOpenProject={(url) => onOpenApp?.("browser", url)}
+                onOpenFinder={onOpenFinder}
                 isMaximized={window.isMaximized}
               />
             )}
