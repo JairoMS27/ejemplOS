@@ -41,6 +41,7 @@ interface FinderWindowProps {
   onOpenFile?: (fileName: string, fileType: string, mediaUrl?: string) => void
   onOpenGame?: (gameType: "minesweeper" | "tetris" | "2048" | "snake") => void
   onOpenApp?: (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => void
+  onOpenProjects?: () => void
   isMaximized?: boolean
   initialPath?: string
 }
@@ -49,6 +50,7 @@ export function FinderWindow({
   onOpenFile,
   onOpenGame,
   onOpenApp,
+  onOpenProjects,
   isMaximized,
   initialPath = "Inicio",
 }: FinderWindowProps) {
@@ -414,7 +416,12 @@ export function FinderWindow({
 
   const handleDoubleClick = (item: FileItem) => {
     if (item.type === "folder") {
-      navigateTo(item.name)
+      // Special case: "Mis Proyectos" opens the projects window
+      if (item.name === "Mis Proyectos") {
+        onOpenProjects?.()
+      } else {
+        navigateTo(item.name)
+      }
     } else if (item.type === "app" && item.appType === "games") {
       navigateTo("Juegos")
     } else if (item.type === "app" && item.appType === "browser") {
