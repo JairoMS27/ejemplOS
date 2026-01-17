@@ -18,6 +18,7 @@ import {
   Settings,
 } from "lucide-react"
 import { useAudio } from "@/lib/audio-context"
+import { useI18n } from "@/lib/i18n-context"
 
 interface TaskBarProps {
   onAppClick: (app: "browser" | "games" | "finder" | "paint" | "settings" | "ejpod") => void
@@ -34,15 +35,17 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
   const controlCenterRef = useRef<HTMLDivElement>(null)
 
   const audio = useAudio()
+  const { t, language } = useI18n()
 
   useEffect(() => {
     const updateTime = () => {
-      setTime(new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }))
+      const locale = language === "es" ? "es-ES" : "en-US"
+      setTime(new Date().toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }))
     }
     updateTime()
     const interval = setInterval(updateTime, 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [language])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,12 +67,12 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
   }, [showStartMenu, showControlCenter])
 
   const apps = [
-    { id: "browser", icon: Globe, label: "Navegador", type: "browser" as const },
-    { id: "finder", icon: Folder, label: "Finder", type: "finder" as const },
-    { id: "ejpod", icon: Music, label: "EjPod", type: "ejpod" as const },
-    { id: "paint", icon: Palette, label: "Paint", type: "paint" as const },
-    { id: "games", icon: Gamepad2, label: "Juegos", type: "games" as const },
-    { id: "settings", icon: Settings, label: "Ajustes", type: "settings" as const },
+    { id: "browser", icon: Globe, label: t.taskbar.browser, type: "browser" as const },
+    { id: "finder", icon: Folder, label: t.taskbar.finder, type: "finder" as const },
+    { id: "ejpod", icon: Music, label: t.taskbar.ejpod, type: "ejpod" as const },
+    { id: "paint", icon: Palette, label: t.taskbar.paint, type: "paint" as const },
+    { id: "games", icon: Gamepad2, label: t.taskbar.games, type: "games" as const },
+    { id: "settings", icon: Settings, label: t.taskbar.settings, type: "settings" as const },
   ]
 
   const formatTime = (time: number) => {
@@ -94,7 +97,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
         {showStartMenu && (
           <div className="absolute bottom-full left-0 mb-2 w-64 bg-black/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl p-2 z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
             <div className="p-3 mb-2 border-b border-white/10">
-              <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">Aplicaciones</p>
+              <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">{t.common.applications}</p>
             </div>
             <div className="space-y-1">
               {apps.map((app) => {
@@ -198,7 +201,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
         {showControlCenter && (
           <div className="absolute bottom-full right-0 mb-2 w-[calc(100vw-16px)] sm:w-80 max-w-80 bg-black/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl p-3 sm:p-4 z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
             <div className="mb-3 pb-3 border-b border-white/10">
-              <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">Centro de Control</p>
+              <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">{t.taskbar.controlCenter}</p>
             </div>
 
             {/* Audio Player Section */}
@@ -286,7 +289,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
             ) : (
               <div className="text-center py-8 text-zinc-500">
                 <Music className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">No hay música reproduciéndose</p>
+                <p className="text-sm">{t.common.noMusicPlaying}</p>
               </div>
             )}
           </div>
@@ -297,7 +300,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
       <button
         onClick={() => setShowAbout(!showAbout)}
         className="hidden sm:flex items-center justify-center w-10 h-10 rounded hover:bg-white/10 transition-all border border-transparent hover:border-white/20"
-        title="Acerca de EjemplOS"
+        title={t.taskbar.aboutEjemplOS}
       >
         <Info className="w-5 h-5 text-white/70" />
       </button>
@@ -316,21 +319,21 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
             </button>
           </div>
           <div className="space-y-3 text-white/80 text-sm">
-            <p className="leading-relaxed">Sistema operativo simulado construido con React y Next.js.</p>
+            <p className="leading-relaxed">{t.taskbar.systemDescription}</p>
             <div className="border-t border-white/10 pt-3">
-              <p className="font-semibold text-white mb-2">Características:</p>
+              <p className="font-semibold text-white mb-2">{t.taskbar.features}</p>
               <ul className="space-y-1 list-disc list-inside">
-                <li>Navegador web funcional</li>
-                <li>Paint para dibujar</li>
-                <li>Juegos: Buscaminas, Tetris, Snake, 2048</li>
-                <li>Explorador de archivos</li>
-                <li>Ventanas redimensionables</li>
-                <li>Reproductor de música</li>
+                <li>{t.taskbar.featuresList.browser}</li>
+                <li>{t.taskbar.featuresList.paint}</li>
+                <li>{t.taskbar.featuresList.games}</li>
+                <li>{t.taskbar.featuresList.fileExplorer}</li>
+                <li>{t.taskbar.featuresList.resizableWindows}</li>
+                <li>{t.taskbar.featuresList.musicPlayer}</li>
               </ul>
             </div>
             <div className="border-t border-white/10 pt-3 text-xs text-white/60">
-              <p>Versión 1.2.1</p>
-              <p className="mt-1">© 2025 EjemplOS. Todos los derechos reservados.</p>
+              <p>{t.taskbar.version} 1.2.1</p>
+              <p className="mt-1">© 2025 EjemplOS. {t.taskbar.allRightsReserved}</p>
             </div>
           </div>
         </div>

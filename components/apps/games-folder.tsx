@@ -16,6 +16,7 @@ import {
   Trophy,
 } from "lucide-react"
 import { useState } from "react"
+import { useI18n } from "@/lib/i18n-context"
 
 interface GamesFolderProps {
   onOpenGame?: (gameType: "minesweeper" | "tetris" | "2048" | "snake") => void
@@ -24,12 +25,13 @@ interface GamesFolderProps {
 
 export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
   const [selectedGame, setSelectedGame] = useState<string | null>(null)
+  const { t } = useI18n()
 
   const games = [
-    { id: "minesweeper", name: "Buscaminas", Icon: Bomb, type: "minesweeper" as const, category: "Puzzle" },
-    { id: "snake", name: "Snake", Icon: Gamepad2, type: "snake" as const, category: "Arcade" },
-    { id: "tetris", name: "Tetris", Icon: Grid3x3, type: "tetris" as const, category: "Arcade" },
-    { id: "2048", name: "2048", Icon: Hash, type: "2048" as const, category: "Puzzle" },
+    { id: "minesweeper", name: t.gamesFolder.minesweeper, Icon: Bomb, type: "minesweeper" as const, category: t.gamesFolder.puzzle },
+    { id: "snake", name: t.gamesFolder.snake, Icon: Gamepad2, type: "snake" as const, category: t.gamesFolder.arcade },
+    { id: "tetris", name: t.gamesFolder.tetris, Icon: Grid3x3, type: "tetris" as const, category: t.gamesFolder.arcade },
+    { id: "2048", name: t.gamesFolder["2048"], Icon: Hash, type: "2048" as const, category: t.gamesFolder.puzzle },
   ]
 
   return (
@@ -51,7 +53,7 @@ export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
         <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
           <span className="hover:text-white cursor-pointer transition-colors">EjemplOS</span>
           <span className="text-zinc-600">/</span>
-          <span className="text-white">Juegos</span>
+          <span className="text-white">{t.desktop.games}</span>
         </div>
 
         <div className="flex-1" />
@@ -60,7 +62,7 @@ export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
           <Search className="h-3.5 w-3.5 text-zinc-500" />
           <input
             type="text"
-            placeholder="Buscar juegos"
+            placeholder={t.gamesFolder.searchGames}
             className="bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none w-24 sm:w-40"
           />
         </div>
@@ -69,15 +71,15 @@ export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="hidden w-48 flex-col gap-1 border-r border-white/10 bg-zinc-900/30 p-3 md:flex backdrop-blur-md flex-shrink-0">
-          <div className="mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Biblioteca</div>
-          <SidebarItem icon={<Gamepad2 className="h-4 w-4" />} label="Todos los juegos" active />
-          <SidebarItem icon={<Star className="h-4 w-4" />} label="Favoritos" />
-          <SidebarItem icon={<Clock className="h-4 w-4" />} label="Recientes" />
+          <div className="mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t.gamesFolder.library}</div>
+          <SidebarItem icon={<Gamepad2 className="h-4 w-4" />} label={t.gamesFolder.allGames} active />
+          <SidebarItem icon={<Star className="h-4 w-4" />} label={t.gamesFolder.favorites} />
+          <SidebarItem icon={<Clock className="h-4 w-4" />} label={t.gamesFolder.recent} />
 
-          <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Categorías</div>
-          <SidebarItem icon={<LayoutGrid className="h-4 w-4" />} label="Arcade" />
-          <SidebarItem icon={<Trophy className="h-4 w-4" />} label="Puzzle" />
-          <SidebarItem icon={<Grid3x3 className="h-4 w-4" />} label="Estrategia" />
+          <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t.gamesFolder.categories}</div>
+          <SidebarItem icon={<LayoutGrid className="h-4 w-4" />} label={t.gamesFolder.arcade} />
+          <SidebarItem icon={<Trophy className="h-4 w-4" />} label={t.gamesFolder.puzzle} />
+          <SidebarItem icon={<Grid3x3 className="h-4 w-4" />} label={t.gamesFolder.strategy} />
         </div>
 
         {/* Main Content */}
@@ -124,8 +126,8 @@ export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
       {/* Status Bar */}
       <div className="flex h-8 items-center justify-between border-t border-white/10 bg-zinc-900/50 px-4 text-[10px] font-medium text-zinc-500 backdrop-blur-xl flex-shrink-0">
         <div className="flex gap-4">
-          <span>{games.length} juegos</span>
-          {selectedGame && <span>1 seleccionado</span>}
+          <span>{games.length} {t.common.games}</span>
+          {selectedGame && <span>1 {t.common.selected}</span>}
         </div>
       </div>
     </div>

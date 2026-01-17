@@ -1,0 +1,254 @@
+export const es = {
+  // Common
+  common: {
+    close: "Cerrar",
+    minimize: "Minimizar",
+    maximize: "Maximizar",
+    restore: "Restaurar",
+    cancel: "Cancelar",
+    save: "Guardar",
+    delete: "Eliminar",
+    reset: "Restablecer",
+    search: "Buscar",
+    today: "Hoy",
+    yesterday: "Ayer",
+    app: "App",
+    folder: "Carpeta",
+    link: "Link",
+    items: "items",
+    selected: "seleccionado",
+    games: "juegos",
+    noResults: "No se encontraron resultados",
+    emptyFolder: "Carpeta vacia",
+    noMusicPlaying: "No hay musica reproduciendose",
+    applications: "Aplicaciones",
+    workInProgress: "En desarrollo",
+  },
+
+  // Desktop
+  desktop: {
+    portfolio: "Portfolio",
+    games: "Juegos",
+    myProjects: "Mis Proyectos",
+    paint: "Paint",
+    settings: "Ajustes",
+    ejpod: "EjPod",
+    browser: "Navegador",
+    refresh: "Actualizar",
+    displaySettings: "Configuracion de pantalla",
+  },
+
+  // Taskbar
+  taskbar: {
+    browser: "Navegador",
+    finder: "Finder",
+    ejpod: "EjPod",
+    paint: "Paint",
+    games: "Juegos",
+    settings: "Ajustes",
+    controlCenter: "Centro de Control",
+    aboutEjemplOS: "Acerca de EjemplOS",
+    features: "Caracteristicas:",
+    featuresList: {
+      browser: "Navegador web funcional",
+      paint: "Paint para dibujar",
+      games: "Juegos: Buscaminas, Tetris, Snake, 2048",
+      fileExplorer: "Explorador de archivos",
+      resizableWindows: "Ventanas redimensionables",
+      musicPlayer: "Reproductor de musica",
+    },
+    version: "Version",
+    allRightsReserved: "Todos los derechos reservados.",
+    systemDescription: "Sistema operativo simulado construido con React y Next.js.",
+  },
+
+  // Window titles
+  windows: {
+    browser: "Navegador",
+    minesweeper: "Buscaminas",
+    finder: "Finder",
+    games: "Juegos",
+    myProjects: "Mis Proyectos",
+    tetris: "Tetris",
+    "2048": "2048",
+    paint: "Paint",
+    settings: "Ajustes",
+    ejpod: "EjPod",
+    snake: "Snake",
+  },
+
+  // Boot screen
+  boot: {
+    starting: "Iniciando EjemplOS v1.2.1...",
+    loadingKernel: "Cargando kernel...",
+    checkingFilesystem: "Verificando sistema de archivos...",
+    mountingVolumes: "Montando volumenes...",
+    startingGui: "Iniciando interfaz grafica...",
+    ready: "Listo.",
+  },
+
+  // Settings
+  settings: {
+    title: "Ajustes",
+    systemConfig: "Configuracion del sistema",
+    resetAll: "Restablecer todo",
+
+    // Tabs
+    tabs: {
+      personalization: "Personalizacion",
+      display: "Pantalla",
+      sound: "Sonido",
+      storage: "Almacenamiento",
+      about: "Acerca de",
+      language: "Idioma",
+    },
+
+    // Personalization
+    personalization: {
+      title: "Personalizacion",
+      subtitle: "Personaliza el fondo de escritorio y la apariencia",
+      wallpaper: "Fondo de escritorio",
+      wallpaperDesc: "Elige el tipo de fondo para tu escritorio",
+      default: "Por defecto",
+      solidColor: "Color solido",
+      image: "Imagen",
+      selectColor: "Selecciona un color",
+      customColor: "Color personalizado:",
+      uploadImage: "Subir imagen desde tu PC",
+      preview: "Vista previa",
+      imageFit: "Ajuste de imagen",
+      cover: "Cubrir",
+      contain: "Contener",
+      stretch: "Estirar",
+      original: "Original",
+      watermark: "Marca de agua",
+      watermarkDesc: "Configura las letras 'EJ' del fondo",
+      showWatermark: "Mostrar marca de agua",
+      opacity: "Opacidad",
+    },
+
+    // Display
+    display: {
+      title: "Pantalla",
+      subtitle: "Opciones de visualizacion del escritorio",
+      backgroundGrid: "Cuadricula de fondo",
+      backgroundGridDesc: "Configura la cuadricula decorativa del escritorio",
+      showGrid: "Mostrar cuadricula",
+      cellSize: "Tamano de celda",
+      animations: "Animaciones",
+      animationsDesc: "Activa o desactiva las animaciones del sistema",
+      systemAnimations: "Animaciones del sistema",
+    },
+
+    // Sound
+    sound: {
+      title: "Sonido",
+      subtitle: "Control de audio del sistema",
+      systemVolume: "Volumen del sistema",
+      systemVolumeDesc: "Ajusta el volumen general",
+      muteAudio: "Silenciar audio",
+      nowPlaying: "Reproduciendo ahora",
+      currentTrack: "Pista de audio actual",
+      playing: "Reproduciendo",
+      paused: "Pausado",
+    },
+
+    // Storage
+    storage: {
+      title: "Almacenamiento",
+      subtitle: "Informacion sobre los datos guardados",
+      localStorageUsage: "Uso del almacenamiento local",
+      localStorageDesc: "Datos guardados en este navegador",
+      spaceUsed: "Espacio utilizado",
+      itemsSaved: "elementos guardados",
+      usage: "Uso",
+      savedData: "Datos guardados",
+      savedDataDesc: "Tipos de datos almacenados",
+      paintImages: "Imagenes de Paint",
+      systemConfig: "Configuracion del sistema",
+      images: "imagenes",
+      noData: "Sin datos",
+      clearData: "Limpiar datos",
+      clearDataDesc: "Elimina los datos guardados",
+      clearStorage: "Limpiar almacenamiento",
+    },
+
+    // About
+    about: {
+      title: "Acerca de",
+      subtitle: "Informacion del sistema operativo",
+      version: "Version 1.1.0 Beta",
+      description: "Sistema operativo web simulado construido con React, Next.js y Tailwind CSS. Disenado para demostrar interfaces de usuario modernas y funcionales.",
+      technicalSpecs: "Especificaciones tecnicas",
+      framework: "Framework",
+      uiLibrary: "UI Library",
+      styles: "Estilos",
+      language: "Lenguaje",
+      browserLabel: "Navegador",
+      unknown: "Desconocido",
+      features: "Caracteristicas",
+      featuresList: {
+        browser: "Navegador web",
+        paint: "Paint profesional",
+        fileExplorer: "Explorador de archivos",
+        musicPlayer: "Reproductor de musica",
+        games: "Juegos (Buscaminas, Tetris, Snake, 2048)",
+        resizableWindows: "Ventanas redimensionables",
+        desktopCustomization: "Personalizacion de escritorio",
+        localStorage: "Almacenamiento local",
+      },
+      copyright: "EjemplOS. Todos los derechos reservados.",
+    },
+
+    // Language
+    language: {
+      title: "Idioma",
+      subtitle: "Elige el idioma del sistema",
+      selectLanguage: "Idioma del sistema",
+      selectLanguageDesc: "Selecciona tu idioma preferido",
+      english: "Ingles",
+      spanish: "Espanol",
+    },
+
+    // Modals
+    modals: {
+      resetTitle: "Restablecer ajustes",
+      resetMessage: "Esto restablecera todos los ajustes a sus valores predeterminados. Esta accion no se puede deshacer.",
+      clearStorageTitle: "Limpiar almacenamiento",
+      clearStorageMessage: "Esto eliminara todos los datos guardados excepto la configuracion del sistema. Las imagenes de Paint seran eliminadas.",
+      clear: "Limpiar",
+    },
+  },
+
+  // Games folder
+  gamesFolder: {
+    minesweeper: "Buscaminas",
+    snake: "Snake",
+    tetris: "Tetris",
+    "2048": "2048",
+    library: "Biblioteca",
+    allGames: "Todos los juegos",
+    favorites: "Favoritos",
+    recent: "Recientes",
+    categories: "Categorias",
+    arcade: "Arcade",
+    puzzle: "Puzzle",
+    strategy: "Estrategia",
+    searchGames: "Buscar juegos",
+  },
+
+  // Finder
+  finder: {
+    favorites: "Favoritos",
+    home: "Inicio",
+    applications: "Aplicaciones",
+    locations: "Ubicaciones",
+    desktop: "Escritorio",
+    documents: "Documentos",
+    downloads: "Descargas",
+    images: "Imagenes",
+    music: "Musica",
+    games: "Juegos",
+    search: "Buscar",
+  },
+}

@@ -23,6 +23,7 @@ import {
   Settings,
   FolderOpen,
 } from "lucide-react"
+import { useI18n } from "@/lib/i18n-context"
 
 interface FileItem {
   name: string
@@ -54,9 +55,11 @@ export function FinderWindow({
   isMaximized,
   initialPath = "Inicio",
 }: FinderWindowProps) {
-  const [currentPath, setCurrentPath] = useState(initialPath)
+  const { t, language } = useI18n()
+  const homeLabel = language === "es" ? "Inicio" : "Home"
+  const [currentPath, setCurrentPath] = useState(initialPath === "Inicio" ? homeLabel : initialPath)
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
-  const [history, setHistory] = useState<string[]>([initialPath])
+  const [history, setHistory] = useState<string[]>([homeLabel])
   const [historyIndex, setHistoryIndex] = useState(0)
   const [searchQuery, setSearchQuery] = useState("")
   const [savedImages, setSavedImages] = useState<FileItem[]>([])
@@ -477,7 +480,7 @@ export function FinderWindow({
           <Search className="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
           <input
             type="text"
-            placeholder="Buscar"
+            placeholder={t.common.search}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none w-16 sm:w-40"
@@ -488,54 +491,54 @@ export function FinderWindow({
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="hidden w-48 flex-col gap-1 border-r border-white/10 bg-zinc-900/30 p-3 md:flex backdrop-blur-md flex-shrink-0">
-          <div className="mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Favoritos</div>
+          <div className="mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t.finder.favorites}</div>
           <SidebarItem
             icon={<Home className="h-4 w-4" />}
-            label="Inicio"
-            active={currentPath === "Inicio"}
-            onClick={() => navigateTo("Inicio")}
+            label={t.finder.home}
+            active={currentPath === homeLabel}
+            onClick={() => navigateTo(homeLabel)}
           />
           <SidebarItem
             icon={<LayoutGrid className="h-4 w-4" />}
-            label="Aplicaciones"
+            label={t.finder.applications}
             active={currentPath === "Aplicaciones"}
             onClick={() => navigateTo("Aplicaciones")}
           />
 
-          <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Ubicaciones</div>
+          <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t.finder.locations}</div>
           <SidebarItem
             icon={<Monitor className="h-4 w-4" />}
-            label="Escritorio"
+            label={t.finder.desktop}
             active={currentPath === "Escritorio"}
             onClick={() => navigateTo("Escritorio")}
           />
           <SidebarItem
             icon={<FileText className="h-4 w-4" />}
-            label="Documentos"
+            label={t.finder.documents}
             active={currentPath === "Documentos"}
             onClick={() => navigateTo("Documentos")}
           />
           <SidebarItem
             icon={<Download className="h-4 w-4" />}
-            label="Descargas"
+            label={t.finder.downloads}
             active={currentPath === "Descargas"}
             onClick={() => navigateTo("Descargas")}
           />
           <SidebarItem
             icon={<ImageIcon className="h-4 w-4" />}
-            label="Imágenes"
+            label={t.finder.images}
             active={currentPath === "Imágenes"}
             onClick={() => navigateTo("Imágenes")}
           />
           <SidebarItem
             icon={<Music className="h-4 w-4" />}
-            label="Música"
+            label={t.finder.music}
             active={currentPath === "Música"}
             onClick={() => navigateTo("Música")}
           />
           <SidebarItem
             icon={<Gamepad2 className="h-4 w-4" />}
-            label="Juegos"
+            label={t.finder.games}
             active={currentPath === "Juegos"}
             onClick={() => navigateTo("Juegos")}
           />
@@ -548,12 +551,12 @@ export function FinderWindow({
               {searchQuery ? (
                 <>
                   <Search className="h-16 w-16 mb-4 opacity-20" />
-                  <p>No se encontraron resultados</p>
+                  <p>{t.common.noResults}</p>
                 </>
               ) : (
                 <>
                   <Folder className="h-16 w-16 mb-4 opacity-20" />
-                  <p>Carpeta vacía</p>
+                  <p>{t.common.emptyFolder}</p>
                 </>
               )}
             </div>
@@ -644,8 +647,8 @@ export function FinderWindow({
       {/* Status Bar */}
       <div className="hidden sm:flex h-8 items-center justify-between border-t border-white/10 bg-zinc-900/50 px-4 text-[10px] font-medium text-zinc-500 backdrop-blur-xl flex-shrink-0">
         <div className="flex gap-4">
-          <span>{currentFiles.length} ítems</span>
-          {selectedItem && <span>1 seleccionado</span>}
+          <span>{currentFiles.length} {t.common.items}</span>
+          {selectedItem && <span>1 {t.common.selected}</span>}
         </div>
         <div className="flex gap-2">
           <LayoutGrid className="w-3 h-3 opacity-50" />

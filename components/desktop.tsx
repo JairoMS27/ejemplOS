@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/context-menu"
 import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings, FolderOpen, Music, Globe } from "lucide-react"
 import { DesktopIcon } from "./desktop-icon"
+import { useI18n } from "@/lib/i18n-context"
 
 // Hook para detectar si estamos en móvil
 function useIsMobile() {
@@ -38,6 +39,7 @@ interface DesktopProps {
 
 export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, onOpenSettings, onOpenEjPod, onOpenBrowser }: DesktopProps) {
   const isMobile = useIsMobile()
+  const { t } = useI18n()
   const [iconPositions, setIconPositions] = useState({
     portfolio: { x: 50, y: 50 },
     twitter: { x: 50, y: 160 },
@@ -75,7 +77,7 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
     {
       id: "portfolio",
       icon: DoorOpen,
-      label: "Portfolio",
+      label: t.desktop.portfolio,
       onDoubleClick: handlePortfolioClick,
     },
     {
@@ -91,37 +93,37 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
     {
       id: "games",
       icon: Gamepad2,
-      label: "Juegos",
+      label: t.desktop.games,
       onDoubleClick: onOpenGamesFolder,
     },
     {
       id: "projects",
       icon: FolderOpen,
-      label: "Mis Proyectos",
+      label: t.desktop.myProjects,
       onDoubleClick: onOpenProjectsFolder,
     },
     {
       id: "paint",
       icon: Palette,
-      label: "Paint",
+      label: t.desktop.paint,
       onDoubleClick: () => onOpenApp?.("paint"),
     },
     {
       id: "settings",
       icon: Settings,
-      label: "Ajustes",
+      label: t.desktop.settings,
       onDoubleClick: onOpenSettings,
     },
     {
       id: "ejpod",
       icon: Music,
-      label: "EjPod",
+      label: t.desktop.ejpod,
       onDoubleClick: onOpenEjPod,
     },
     {
       id: "browser",
       icon: Globe,
-      label: "Navegador",
+      label: t.desktop.browser,
       onDoubleClick: onOpenBrowser,
     },
   ]
@@ -185,12 +187,12 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
         <ContextMenuContent className="w-56 bg-black border-white/20 text-white">
           <ContextMenuItem onClick={handleRefresh} className="focus:bg-white/10 cursor-pointer">
             <RefreshCw className="mr-2 h-4 w-4" />
-            <span>Actualizar</span>
+            <span>{t.desktop.refresh}</span>
           </ContextMenuItem>
           <ContextMenuSeparator className="bg-white/20" />
           <ContextMenuItem onClick={onOpenSettings} className="focus:bg-white/10 cursor-pointer">
             <Monitor className="mr-2 h-4 w-4" />
-            <span>Configuracion de pantalla</span>
+            <span>{t.desktop.displaySettings}</span>
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
