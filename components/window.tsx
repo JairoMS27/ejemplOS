@@ -247,40 +247,40 @@ export function Window({
 
             {!isFullscreen && (
               <>
-                {/* Bordes */}
+                {/* Bordes - más grandes para facilitar el redimensionamiento */}
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 'n')}
-                  className="absolute top-0 left-0 right-0 h-1 hover:bg-blue-500/20"
+                  className="absolute top-0 left-3 right-3 h-2 cursor-ns-resize hover:bg-blue-500/20"
                 />
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 's')}
-                  className="absolute bottom-0 left-0 right-0 h-1 hover:bg-blue-500/20"
+                  className="absolute bottom-0 left-3 right-3 h-2 cursor-ns-resize hover:bg-blue-500/20"
                 />
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 'e')}
-                  className="absolute top-0 right-0 bottom-0 w-1 hover:bg-blue-500/20"
+                  className="absolute top-3 right-0 bottom-3 w-2 cursor-ew-resize hover:bg-blue-500/20"
                 />
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 'w')}
-                  className="absolute top-0 left-0 bottom-0 w-1 hover:bg-blue-500/20"
+                  className="absolute top-3 left-0 bottom-3 w-2 cursor-ew-resize hover:bg-blue-500/20"
                 />
-                
-                {/* Esquinas */}
+
+                {/* Esquinas - más grandes para facilitar el redimensionamiento */}
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 'nw')}
-                  className="absolute top-0 left-0 w-3 h-3 hover:bg-blue-500/30"
+                  className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize hover:bg-blue-500/30"
                 />
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 'ne')}
-                  className="absolute top-0 right-0 w-3 h-3 hover:bg-blue-500/30"
+                  className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize hover:bg-blue-500/30"
                 />
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 'sw')}
-                  className="absolute bottom-0 left-0 w-3 h-3 hover:bg-blue-500/30"
+                  className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize hover:bg-blue-500/30"
                 />
                 <div
                   onMouseDown={(e) => handleResizeStart(e, 'se')}
-                  className="absolute bottom-0 right-0 w-3 h-3 hover:bg-blue-500/30"
+                  className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize hover:bg-blue-500/30"
                 />
               </>
             )}

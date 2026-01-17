@@ -18,6 +18,12 @@ import {
   Gamepad2,
   Wrench,
   Sparkles,
+  LayoutGrid,
+  FileText,
+  Download,
+  ImageIcon,
+  Music,
+  Monitor,
 } from "lucide-react"
 
 interface ProjectItem {
@@ -193,6 +199,14 @@ export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderPro
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-zinc-400 min-w-0">
+          <span className="hover:text-white cursor-pointer transition-colors hidden sm:inline">
+            EjemplOS
+          </span>
+          <span className="text-zinc-600 hidden sm:inline">/</span>
+          <span className="hover:text-white cursor-pointer transition-colors hidden sm:inline">
+            Escritorio
+          </span>
+          <span className="text-zinc-600 hidden sm:inline">/</span>
           <span
             className="hover:text-white cursor-pointer transition-colors hidden sm:inline"
             onClick={() => navigateTo("Todos")}
@@ -228,42 +242,48 @@ export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderPro
             onClick={() => navigateTo("Todos")}
           />
           <SidebarItem
-            icon={<Star className="h-4 w-4" />}
-            label="Favoritos"
-            active={currentPath === "Favoritos"}
-            onClick={() => navigateTo("Favoritos")}
-          />
-          <SidebarItem
-            icon={<Clock className="h-4 w-4" />}
-            label="Recientes"
-            active={currentPath === "Recientes"}
-            onClick={() => navigateTo("Recientes")}
+            icon={<LayoutGrid className="h-4 w-4" />}
+            label="Aplicaciones"
+            active={false}
+            onClick={() => {}}
           />
 
-          <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Categorías</div>
+          <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Ubicaciones</div>
+          <SidebarItem
+            icon={<Monitor className="h-4 w-4" />}
+            label="Escritorio"
+            active={false}
+            onClick={() => {}}
+          />
+          <SidebarItem
+            icon={<FileText className="h-4 w-4" />}
+            label="Documentos"
+            active={false}
+            onClick={() => {}}
+          />
+          <SidebarItem
+            icon={<Download className="h-4 w-4" />}
+            label="Descargas"
+            active={false}
+            onClick={() => {}}
+          />
+          <SidebarItem
+            icon={<ImageIcon className="h-4 w-4" />}
+            label="Imágenes"
+            active={false}
+            onClick={() => {}}
+          />
+          <SidebarItem
+            icon={<Music className="h-4 w-4" />}
+            label="Música"
+            active={false}
+            onClick={() => {}}
+          />
           <SidebarItem
             icon={<Gamepad2 className="h-4 w-4" />}
             label="Juegos"
-            active={currentPath === "Juegos"}
-            onClick={() => navigateTo("Juegos")}
-          />
-          <SidebarItem
-            icon={<Wrench className="h-4 w-4" />}
-            label="Herramientas"
-            active={currentPath === "Herramientas"}
-            onClick={() => navigateTo("Herramientas")}
-          />
-          <SidebarItem
-            icon={<Sparkles className="h-4 w-4" />}
-            label="IA"
-            active={currentPath === "IA"}
-            onClick={() => navigateTo("IA")}
-          />
-          <SidebarItem
-            icon={<Rocket className="h-4 w-4" />}
-            label="Eventos"
-            active={currentPath === "Eventos"}
-            onClick={() => navigateTo("Eventos")}
+            active={false}
+            onClick={() => {}}
           />
         </div>
 
@@ -305,11 +325,11 @@ export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderPro
                   <div className="relative">
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
                       selectedProject === project.id
-                        ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-lg shadow-blue-500/10"
+                        ? "bg-zinc-700/50"
                         : "bg-zinc-800/50 group-hover:bg-zinc-700/50"
                     }`}>
                       <project.Icon
-                        className={`w-7 h-7 ${selectedProject === project.id ? "text-blue-400" : "text-zinc-300 group-hover:text-white"} transition-colors`}
+                        className={`w-7 h-7 ${selectedProject === project.id ? "text-white" : "text-zinc-300 group-hover:text-white"} transition-colors`}
                       />
                     </div>
                   </div>

@@ -35,7 +35,7 @@ interface WindowManagerProps {
   onFocus: (id: string) => void
   onOpenFile?: (fileName: string, fileType: string, imageUrl?: string) => void
   onOpenGame?: (gameType: "minesweeper" | "tetris" | "2048" | "snake") => void
-  onOpenApp?: (appType: "browser" | "paint", url?: string) => void
+  onOpenApp?: (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => void
   onMinimize?: (id: string) => void
   onMaximize?: (id: string) => void
   onSizeChange?: (id: string, size: { width: number; height: number }) => void

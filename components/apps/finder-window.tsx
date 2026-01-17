@@ -19,6 +19,9 @@ import {
   Globe,
   DoorOpen,
   Palette,
+  Monitor,
+  Settings,
+  FolderOpen,
 } from "lucide-react"
 
 interface FileItem {
@@ -29,7 +32,7 @@ interface FileItem {
   modified?: string
   imageUrl?: string
   audioUrl?: string
-  appType?: "games" | "browser" | "external-link" | "paint"
+  appType?: "games" | "browser" | "external-link" | "paint" | "ejpod" | "settings"
   gameType?: "minesweeper" | "tetris" | "2048" | "snake"
   url?: string
 }
@@ -37,7 +40,7 @@ interface FileItem {
 interface FinderWindowProps {
   onOpenFile?: (fileName: string, fileType: string, mediaUrl?: string) => void
   onOpenGame?: (gameType: "minesweeper" | "tetris" | "2048" | "snake") => void
-  onOpenApp?: (appType: "browser" | "paint", url?: string) => void
+  onOpenApp?: (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => void
   isMaximized?: boolean
   initialPath?: string
 }
@@ -100,23 +103,7 @@ export function FinderWindow({
         icon: <LayoutGrid className="w-10 h-10 text-zinc-400 fill-zinc-400/20" />,
       },
     ],
-    Aplicaciones: [
-      {
-        name: "Navegador",
-        type: "app",
-        appType: "browser",
-        icon: <Globe className="w-10 h-10 text-zinc-300" />,
-        size: "App",
-        modified: "Hoy",
-      },
-      {
-        name: "Paint",
-        type: "app",
-        appType: "paint",
-        icon: <Palette className="w-10 h-10 text-zinc-300" />,
-        size: "App",
-        modified: "Hoy",
-      },
+    Escritorio: [
       {
         name: "Portfolio",
         type: "app",
@@ -137,6 +124,102 @@ export function FinderWindow({
           </svg>
         ),
         size: "Link",
+        modified: "Hoy",
+      },
+      {
+        name: "Juegos",
+        type: "app",
+        appType: "games",
+        icon: <Gamepad2 className="w-10 h-10 text-zinc-300" />,
+        size: "Carpeta",
+        modified: "Hoy",
+      },
+      {
+        name: "Mis Proyectos",
+        type: "folder",
+        icon: <FolderOpen className="w-10 h-10 text-zinc-400 fill-zinc-400/20" />,
+        size: "Carpeta",
+        modified: "Hoy",
+      },
+      {
+        name: "Paint",
+        type: "app",
+        appType: "paint",
+        icon: <Palette className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "Ajustes",
+        type: "app",
+        appType: "settings",
+        icon: <Settings className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "EjPod",
+        type: "app",
+        appType: "ejpod",
+        icon: <Music className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "Navegador",
+        type: "app",
+        appType: "browser",
+        icon: <Globe className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+    ],
+    Aplicaciones: [
+      {
+        name: "Navegador",
+        type: "app",
+        appType: "browser",
+        icon: <Globe className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "Finder",
+        type: "folder",
+        icon: <Folder className="w-10 h-10 text-zinc-400 fill-zinc-400/20" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "EjPod",
+        type: "app",
+        appType: "ejpod",
+        icon: <Music className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "Paint",
+        type: "app",
+        appType: "paint",
+        icon: <Palette className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "Juegos",
+        type: "app",
+        appType: "games",
+        icon: <Gamepad2 className="w-10 h-10 text-zinc-300" />,
+        size: "App",
+        modified: "Hoy",
+      },
+      {
+        name: "Ajustes",
+        type: "app",
+        appType: "settings",
+        icon: <Settings className="w-10 h-10 text-zinc-300" />,
+        size: "App",
         modified: "Hoy",
       },
     ],
@@ -345,6 +428,10 @@ export function FinderWindow({
       onOpenApp?.("browser", item.url)
     } else if (item.type === "app" && item.appType === "paint") {
       onOpenApp?.("paint")
+    } else if (item.type === "app" && item.appType === "ejpod") {
+      onOpenApp?.("ejpod")
+    } else if (item.type === "app" && item.appType === "settings") {
+      onOpenApp?.("settings")
     } else if (item.type === "app" && item.appType === "external-link" && item.url) {
       window.location.href = item.url
     } else if (item.type === "app" && item.gameType) {
@@ -416,6 +503,12 @@ export function FinderWindow({
           />
 
           <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Ubicaciones</div>
+          <SidebarItem
+            icon={<Monitor className="h-4 w-4" />}
+            label="Escritorio"
+            active={currentPath === "Escritorio"}
+            onClick={() => navigateTo("Escritorio")}
+          />
           <SidebarItem
             icon={<FileText className="h-4 w-4" />}
             label="Documentos"
