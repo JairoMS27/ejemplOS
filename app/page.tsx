@@ -205,7 +205,7 @@ function HomeContent() {
     setOpenWindows([...openWindows, newWindow])
   }
 
-  const openApp = (appType: "browser" | "paint", url?: string) => {
+  const openApp = (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => {
     openApplication(appType, url)
   }
 
@@ -244,7 +244,7 @@ function HomeContent() {
     <div className="relative w-full h-screen bg-black overflow-hidden">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
         <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
-          BETA 1.2
+          v1.2.1
         </div>
       </div>
 
@@ -255,7 +255,7 @@ function HomeContent() {
       <div className="relative z-10 w-full h-full flex flex-col">
         {/* Desktop area */}
         <div className="flex-1 overflow-hidden relative">
-          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} onOpenEjPod={() => openApplication("ejpod")} />
+          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} onOpenEjPod={() => openApplication("ejpod")} onOpenBrowser={() => openApplication("browser")} />
 
           {/* Windows */}
           <WindowManager

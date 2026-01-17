@@ -8,7 +8,7 @@ export function BootScreen() {
 
   useEffect(() => {
     const bootSequence = [
-      'Iniciando EjemplOS v1.0...',
+      'Iniciando EjemplOS v1.2.1...',
       'Cargando kernel...',
       'Verificando sistema de archivos...',
       'Montando volúmenes...',

@@ -41,12 +41,12 @@ export function EjPodWindow({ isMaximized, windowId, initialTrack, onClose, onMi
 
   // Cleanup: stop audio when component unmounts
   useEffect(() => {
+    const currentWindowId = windowId
     return () => {
-      if (audio.currentTrack?.windowId === windowId) {
-        audio.stop()
-      }
+      // Always stop audio when this EjPod window closes
+      audio.stop()
     }
-  }, [windowId])
+  }, [windowId, audio])
 
   // Load tracks from Música folder
   useEffect(() => {

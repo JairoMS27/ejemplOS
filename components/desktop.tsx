@@ -8,7 +8,7 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu"
-import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings, FolderOpen, Music } from "lucide-react"
+import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings, FolderOpen, Music, Globe } from "lucide-react"
 import { DesktopIcon } from "./desktop-icon"
 
 // Hook para detectar si estamos en móvil
@@ -33,9 +33,10 @@ interface DesktopProps {
   onOpenApp?: (appType: "browser" | "paint", url?: string) => void
   onOpenSettings?: () => void
   onOpenEjPod?: () => void
+  onOpenBrowser?: () => void
 }
 
-export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, onOpenSettings, onOpenEjPod }: DesktopProps) {
+export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, onOpenSettings, onOpenEjPod, onOpenBrowser }: DesktopProps) {
   const isMobile = useIsMobile()
   const [iconPositions, setIconPositions] = useState({
     portfolio: { x: 50, y: 50 },
@@ -45,6 +46,7 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
     paint: { x: 50, y: 490 },
     settings: { x: 50, y: 600 },
     ejpod: { x: 50, y: 710 },
+    browser: { x: 50, y: 820 },
   })
 
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
@@ -61,7 +63,7 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
     window.location.href = "https://twitter.com/ej3mplo"
   }
 
-  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "projects" | "paint" | "settings" | "ejpod", position: { x: number; y: number }) => {
+  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "projects" | "paint" | "settings" | "ejpod" | "browser", position: { x: number; y: number }) => {
     setIconPositions((prev) => ({
       ...prev,
       [icon]: position,
@@ -115,6 +117,12 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
       icon: Music,
       label: "EjPod",
       onDoubleClick: onOpenEjPod,
+    },
+    {
+      id: "browser",
+      icon: Globe,
+      label: "Navegador",
+      onDoubleClick: onOpenBrowser,
     },
   ]
 
