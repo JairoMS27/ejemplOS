@@ -258,9 +258,30 @@ function HomeContent() {
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
+      {/* BETA Banner */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
-        <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
-          BETA
+        <div className="relative group">
+          {/* Glow effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-400 rounded-lg blur-md opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse" />
+
+          {/* Main badge */}
+          <div className="relative flex items-center gap-2 bg-black/90 backdrop-blur-sm px-5 py-2 rounded-lg border border-white/20">
+            {/* Animated dots */}
+            <div className="flex gap-1">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+
+            {/* Text */}
+            <span className="text-sm font-bold bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+              BETA
+            </span>
+            <span className="text-white/50 text-xs">—</span>
+            <span className="text-xs text-white/70 font-medium tracking-wide">
+              Work in Progress
+            </span>
+          </div>
         </div>
       </div>
 
