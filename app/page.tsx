@@ -89,6 +89,7 @@ function HomeContent() {
       imageUrl?: string
       audioUrl?: string
       initialUrl?: string
+      initialPath?: string
       isMaximized?: boolean
       isMinimized?: boolean
       savedSize?: { width: number; height: number }
@@ -209,6 +210,21 @@ function HomeContent() {
     openApplication(appType, url)
   }
 
+  const openFinder = (path?: string) => {
+    const newWindow = {
+      id: `finder-${Date.now()}`,
+      type: "finder" as const,
+      title: "Finder",
+      zIndex: Math.max(...openWindows.map((w) => w.zIndex), 0) + 1,
+      isMaximized: false,
+      isMinimized: false,
+      savedSize: { width: 900, height: 600 },
+      savedPosition: { x: 100 + openWindows.length * 30, y: 100 + openWindows.length * 30 },
+      initialPath: path,
+    }
+    setOpenWindows([...openWindows, newWindow])
+  }
+
   const closeWindow = (id: string) => {
     setOpenWindows(openWindows.filter((w) => w.id !== id))
   }
@@ -265,6 +281,7 @@ function HomeContent() {
             onOpenFile={openFile}
             onOpenGame={openGame}
             onOpenApp={openApp}
+            onOpenFinder={openFinder}
             onMinimize={minimizeWindow}
             onMaximize={maximizeWindow}
             onSizeChange={updateWindowSize}

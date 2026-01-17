@@ -38,10 +38,12 @@ interface ProjectItem {
 
 interface ProjectsFolderProps {
   onOpenProject?: (url: string) => void
+  onOpenFinder?: (path?: string) => void
+  onOpenApp?: (appType: "ejpod" | "settings" | "games") => void
   isMaximized?: boolean
 }
 
-export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderProps) {
+export function ProjectsFolder({ onOpenProject, onOpenFinder, onOpenApp, isMaximized }: ProjectsFolderProps) {
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
   const [currentPath, setCurrentPath] = useState("Todos")
   const [history, setHistory] = useState<string[]>(["Todos"])
@@ -240,7 +242,7 @@ export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderPro
             icon={<LayoutGrid className="h-4 w-4" />}
             label="Aplicaciones"
             active={false}
-            onClick={() => {}}
+            onClick={() => onOpenFinder?.("Aplicaciones")}
           />
 
           <div className="mt-4 mb-2 px-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Ubicaciones</div>
@@ -248,37 +250,37 @@ export function ProjectsFolder({ onOpenProject, isMaximized }: ProjectsFolderPro
             icon={<Monitor className="h-4 w-4" />}
             label="Escritorio"
             active={false}
-            onClick={() => {}}
+            onClick={() => onOpenFinder?.("Escritorio")}
           />
           <SidebarItem
             icon={<FileText className="h-4 w-4" />}
             label="Documentos"
             active={false}
-            onClick={() => {}}
+            onClick={() => onOpenFinder?.("Documentos")}
           />
           <SidebarItem
             icon={<Download className="h-4 w-4" />}
             label="Descargas"
             active={false}
-            onClick={() => {}}
+            onClick={() => onOpenFinder?.("Descargas")}
           />
           <SidebarItem
             icon={<ImageIcon className="h-4 w-4" />}
             label="Imágenes"
             active={false}
-            onClick={() => {}}
+            onClick={() => onOpenFinder?.("Imágenes")}
           />
           <SidebarItem
             icon={<Music className="h-4 w-4" />}
             label="Música"
             active={false}
-            onClick={() => {}}
+            onClick={() => onOpenFinder?.("Música")}
           />
           <SidebarItem
             icon={<Gamepad2 className="h-4 w-4" />}
             label="Juegos"
             active={false}
-            onClick={() => {}}
+            onClick={() => onOpenFinder?.("Juegos")}
           />
         </div>
 
