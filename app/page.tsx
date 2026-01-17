@@ -260,28 +260,22 @@ function HomeContent() {
     <div className="relative w-full h-screen bg-black overflow-hidden">
       {/* BETA Banner */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
-        <div className="relative group">
-          {/* Glow effect */}
-          <div className="absolute -inset-1 bg-white rounded-lg blur-md opacity-50 group-hover:opacity-75 transition duration-500 animate-pulse" />
-
-          {/* Main badge */}
-          <div className="relative flex items-center gap-2 bg-black/90 backdrop-blur-sm px-5 py-2 rounded-lg border border-white/30">
-            {/* Animated dots */}
-            <div className="flex gap-1">
-              <span className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-2 h-2 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 rounded-full bg-white/60 animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-
-            {/* Text */}
-            <span className="text-sm font-bold text-white">
-              BETA
-            </span>
-            <span className="text-white/50 text-xs">—</span>
-            <span className="text-xs text-white/70 font-medium tracking-wide">
-              Work in Progress
-            </span>
+        <div className="flex items-center gap-2 bg-black/90 backdrop-blur-sm px-5 py-2 rounded-lg border border-white">
+          {/* Animated dots */}
+          <div className="flex gap-1">
+            <span className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 rounded-full bg-white/60 animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
+
+          {/* Text */}
+          <span className="text-sm font-bold text-white">
+            BETA
+          </span>
+          <span className="text-white/50 text-xs">—</span>
+          <span className="text-xs text-white/70 font-medium tracking-wide">
+            Work in Progress
+          </span>
         </div>
       </div>
 
