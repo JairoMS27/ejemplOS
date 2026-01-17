@@ -251,4 +251,28 @@ export const en = {
     games: "Games",
     search: "Search",
   },
+
+  // Changelog
+  changelog: {
+    title: "What's New - EjemplOS v1.2.1",
+    bugFixes: "Bug Fixes",
+    bugFixesList: {
+      audioStops: "Audio now stops correctly when closing the music window",
+      windowResize: "Fixed window resizing from edges",
+      projectsNav: "Improved navigation in My Projects folder",
+    },
+    qualityOfLife: "Quality of Life Improvements",
+    qualityOfLifeList: {
+      browserDesktop: "Browser now available on desktop",
+      finderSidebar: "Finder sidebar updated with all applications",
+      desktopLocation: "Desktop visible in Finder locations",
+    },
+    uiImprovements: "UI Improvements",
+    uiImprovementsList: {
+      navigationPaths: "Clearer navigation paths in folders",
+      selectionDesign: "Simplified selection design in My Projects",
+      consistentSidebar: "Consistent sidebar between applications",
+    },
+    understood: "Got it",
+  },
 }

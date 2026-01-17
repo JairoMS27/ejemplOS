@@ -30,7 +30,7 @@ export function BootScreen() {
     }, 300)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [t])
 
   return (
     <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden font-mono">
