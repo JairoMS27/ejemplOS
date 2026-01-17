@@ -38,6 +38,7 @@ interface WindowManagerProps {
   onOpenGame?: (gameType: "minesweeper" | "tetris" | "2048" | "snake") => void
   onOpenApp?: (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => void
   onOpenFinder?: (path?: string) => void
+  onOpenProjects?: () => void
   onMinimize?: (id: string) => void
   onMaximize?: (id: string) => void
   onSizeChange?: (id: string, size: { width: number; height: number }) => void
@@ -52,6 +53,7 @@ export function WindowManager({
   onOpenGame,
   onOpenApp,
   onOpenFinder,
+  onOpenProjects,
   onMinimize,
   onMaximize,
   onSizeChange,
@@ -105,6 +107,7 @@ export function WindowManager({
                 onOpenFile={onOpenFile}
                 onOpenGame={onOpenGame}
                 onOpenApp={onOpenApp}
+                onOpenProjects={onOpenProjects}
                 isMaximized={window.isMaximized}
                 initialPath={window.initialPath}
               />

@@ -260,7 +260,7 @@ function HomeContent() {
     <div className="relative w-full h-screen bg-black overflow-hidden">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
         <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
-          v1.2.1
+          BETA
         </div>
       </div>
 
@@ -282,6 +282,7 @@ function HomeContent() {
             onOpenGame={openGame}
             onOpenApp={openApp}
             onOpenFinder={openFinder}
+            onOpenProjects={openProjectsFolder}
             onMinimize={minimizeWindow}
             onMaximize={maximizeWindow}
             onSizeChange={updateWindowSize}
