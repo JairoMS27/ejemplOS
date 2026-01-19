@@ -92,6 +92,14 @@ export function ImageEditorWindow() {
   const [moveStart, setMoveStart] = useState<{ x: number; y: number } | null>(null)
   const [layerOffset, setLayerOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
 
+  // Resize/Transform state
+  type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | null
+  const [resizeHandle, setResizeHandle] = useState<ResizeHandle>(null)
+  const [isResizing, setIsResizing] = useState(false)
+  const [transformBounds, setTransformBounds] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
+  const [originalBounds, setOriginalBounds] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
+  const [originalImageData, setOriginalImageData] = useState<ImageData | null>(null)
+
   // Create initial layer
   useEffect(() => {
     const initialLayer = createNewLayer(t.imageEditor?.backgroundLayer || "Fondo")
@@ -111,6 +119,19 @@ export function ImageEditorWindow() {
       textInputRef.current.focus()
     }
   }, [showTextInput])
+
+  // Update transform bounds when tool changes to move or active layer changes
+  useEffect(() => {
+    if (tool === "move") {
+      const activeLayer = layers.find(l => l.id === activeLayerId)
+      if (activeLayer) {
+        const bounds = getLayerBounds(activeLayer)
+        setTransformBounds(bounds)
+      }
+    } else {
+      setTransformBounds(null)
+    }
+  }, [tool, activeLayerId, layers, getLayerBounds])
 
   const createNewLayer = (name?: string): Layer => {
     const id = `layer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -277,6 +298,65 @@ export function ImageEditorWindow() {
 
   const getActiveLayer = () => layers.find(l => l.id === activeLayerId)
 
+  // Calculate bounding box of non-transparent content in a layer
+  const getLayerBounds = useCallback((layer: Layer): { x: number; y: number; width: number; height: number } | null => {
+    if (!layer.canvas) return null
+
+    const ctx = layer.canvas.getContext("2d")
+    if (!ctx) return null
+
+    const imageData = ctx.getImageData(0, 0, canvasSize.width, canvasSize.height)
+    const data = imageData.data
+
+    let minX = canvasSize.width
+    let minY = canvasSize.height
+    let maxX = 0
+    let maxY = 0
+    let hasContent = false
+
+    for (let y = 0; y < canvasSize.height; y++) {
+      for (let x = 0; x < canvasSize.width; x++) {
+        const alpha = data[(y * canvasSize.width + x) * 4 + 3]
+        if (alpha > 0) {
+          hasContent = true
+          minX = Math.min(minX, x)
+          minY = Math.min(minY, y)
+          maxX = Math.max(maxX, x)
+          maxY = Math.max(maxY, y)
+        }
+      }
+    }
+
+    if (!hasContent) return null
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX + 1,
+      height: maxY - minY + 1
+    }
+  }, [canvasSize])
+
+  // Check if point is near a resize handle
+  const getHandleAtPoint = (x: number, y: number, bounds: { x: number; y: number; width: number; height: number }): ResizeHandle => {
+    const handleSize = 12
+    const { x: bx, y: by, width: bw, height: bh } = bounds
+
+    // Corner handles
+    if (Math.abs(x - bx) <= handleSize && Math.abs(y - by) <= handleSize) return "nw"
+    if (Math.abs(x - (bx + bw)) <= handleSize && Math.abs(y - by) <= handleSize) return "ne"
+    if (Math.abs(x - bx) <= handleSize && Math.abs(y - (by + bh)) <= handleSize) return "sw"
+    if (Math.abs(x - (bx + bw)) <= handleSize && Math.abs(y - (by + bh)) <= handleSize) return "se"
+
+    // Edge handles
+    if (Math.abs(x - (bx + bw / 2)) <= handleSize && Math.abs(y - by) <= handleSize) return "n"
+    if (Math.abs(x - (bx + bw / 2)) <= handleSize && Math.abs(y - (by + bh)) <= handleSize) return "s"
+    if (Math.abs(x - bx) <= handleSize && Math.abs(y - (by + bh / 2)) <= handleSize) return "w"
+    if (Math.abs(x - (bx + bw)) <= handleSize && Math.abs(y - (by + bh / 2)) <= handleSize) return "e"
+
+    return null
+  }
+
   const drawLine = (ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) => {
     ctx.beginPath()
     ctx.moveTo(x1, y1)
@@ -378,12 +458,32 @@ export function ImageEditorWindow() {
     }
 
     if (tool === "move") {
+      // Check if clicking on a resize handle first
+      if (transformBounds) {
+        const handle = getHandleAtPoint(x, y, transformBounds)
+        if (handle) {
+          // Start resizing
+          setResizeHandle(handle)
+          setIsResizing(true)
+          setMoveStart({ x, y })
+          setOriginalBounds({ ...transformBounds })
+          // Save original image data for scaling
+          const layerCtx = activeLayer.canvas.getContext("2d")
+          if (layerCtx) {
+            setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+          }
+          setIsDrawing(true)
+          return
+        }
+      }
+
       // Auto-select layer: find topmost layer with non-transparent pixel at click position
       const pixelX = Math.floor(x)
       const pixelY = Math.floor(y)
 
       // Check layers from top to bottom (reverse order)
       let selectedLayerId = activeLayerId
+      let selectedLayer = activeLayer
       for (let i = layers.length - 1; i >= 0; i--) {
         const layer = layers[i]
         if (!layer.visible || !layer.canvas) continue
@@ -395,6 +495,7 @@ export function ImageEditorWindow() {
         // Check if pixel has alpha > 0 (not transparent)
         if (pixelData[3] > 0) {
           selectedLayerId = layer.id
+          selectedLayer = layer
           break
         }
       }
@@ -402,6 +503,12 @@ export function ImageEditorWindow() {
       // Switch to the detected layer if different
       if (selectedLayerId !== activeLayerId) {
         setActiveLayerId(selectedLayerId)
+      }
+
+      // Calculate and set transform bounds for the selected layer
+      if (selectedLayer) {
+        const bounds = getLayerBounds(selectedLayer)
+        setTransformBounds(bounds)
       }
 
       setMoveStart({ x, y })
@@ -449,8 +556,102 @@ export function ImageEditorWindow() {
     const activeLayer = getActiveLayer()
     if (!activeLayer?.canvas || !activeLayer.visible) return
 
-    // Handle move tool
-    if (tool === "move" && moveStart) {
+    // Handle resize
+    if (tool === "move" && isResizing && resizeHandle && originalBounds && moveStart && originalImageData) {
+      const deltaX = x - moveStart.x
+      const deltaY = y - moveStart.y
+
+      let newBounds = { ...originalBounds }
+
+      // Calculate new bounds based on which handle is being dragged
+      switch (resizeHandle) {
+        case "nw":
+          newBounds.x = originalBounds.x + deltaX
+          newBounds.y = originalBounds.y + deltaY
+          newBounds.width = originalBounds.width - deltaX
+          newBounds.height = originalBounds.height - deltaY
+          break
+        case "ne":
+          newBounds.y = originalBounds.y + deltaY
+          newBounds.width = originalBounds.width + deltaX
+          newBounds.height = originalBounds.height - deltaY
+          break
+        case "sw":
+          newBounds.x = originalBounds.x + deltaX
+          newBounds.width = originalBounds.width - deltaX
+          newBounds.height = originalBounds.height + deltaY
+          break
+        case "se":
+          newBounds.width = originalBounds.width + deltaX
+          newBounds.height = originalBounds.height + deltaY
+          break
+        case "n":
+          newBounds.y = originalBounds.y + deltaY
+          newBounds.height = originalBounds.height - deltaY
+          break
+        case "s":
+          newBounds.height = originalBounds.height + deltaY
+          break
+        case "w":
+          newBounds.x = originalBounds.x + deltaX
+          newBounds.width = originalBounds.width - deltaX
+          break
+        case "e":
+          newBounds.width = originalBounds.width + deltaX
+          break
+      }
+
+      // Ensure minimum size
+      if (newBounds.width < 10) newBounds.width = 10
+      if (newBounds.height < 10) newBounds.height = 10
+
+      setTransformBounds(newBounds)
+
+      // Preview the scaled image
+      const mainCanvas = mainCanvasRef.current
+      if (!mainCanvas) return
+      const mainCtx = mainCanvas.getContext("2d")
+      if (!mainCtx) return
+
+      // Clear and draw checkerboard
+      mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height)
+      const patternSize = 10
+      for (let px = 0; px < mainCanvas.width; px += patternSize) {
+        for (let py = 0; py < mainCanvas.height; py += patternSize) {
+          mainCtx.fillStyle = ((px + py) / patternSize) % 2 === 0 ? "#2a2a2a" : "#3a3a3a"
+          mainCtx.fillRect(px, py, patternSize, patternSize)
+        }
+      }
+
+      // Draw other layers
+      layers.forEach(layer => {
+        if (layer.visible && layer.canvas && layer.id !== activeLayerId) {
+          mainCtx.globalAlpha = layer.opacity / 100
+          mainCtx.drawImage(layer.canvas, 0, 0)
+        }
+      })
+
+      // Draw scaled active layer
+      const tempCanvas = document.createElement("canvas")
+      tempCanvas.width = canvasSize.width
+      tempCanvas.height = canvasSize.height
+      const tempCtx = tempCanvas.getContext("2d")
+      if (tempCtx) {
+        tempCtx.putImageData(originalImageData, 0, 0)
+        mainCtx.globalAlpha = activeLayer.opacity / 100
+        // Scale from original bounds to new bounds
+        mainCtx.drawImage(
+          tempCanvas,
+          originalBounds.x, originalBounds.y, originalBounds.width, originalBounds.height,
+          newBounds.x, newBounds.y, newBounds.width, newBounds.height
+        )
+      }
+      mainCtx.globalAlpha = 1
+      return
+    }
+
+    // Handle move tool (not resizing)
+    if (tool === "move" && moveStart && !isResizing) {
       const offsetX = x - moveStart.x
       const offsetY = y - moveStart.y
       setLayerOffset({ x: offsetX, y: offsetY })
@@ -513,9 +714,38 @@ export function ImageEditorWindow() {
 
   const stopDrawing = () => {
     if (isDrawing) {
-      // Apply move if using move tool
-      if (tool === "move" && moveStart && (layerOffset.x !== 0 || layerOffset.y !== 0)) {
-        const activeLayer = getActiveLayer()
+      const activeLayer = getActiveLayer()
+
+      // Apply resize if using move tool with resize
+      if (tool === "move" && isResizing && originalBounds && transformBounds && originalImageData && activeLayer?.canvas) {
+        const ctx = activeLayer.canvas.getContext("2d")
+        if (ctx) {
+          // Create temp canvas with original content
+          const tempCanvas = document.createElement("canvas")
+          tempCanvas.width = canvasSize.width
+          tempCanvas.height = canvasSize.height
+          const tempCtx = tempCanvas.getContext("2d")
+          if (tempCtx) {
+            tempCtx.putImageData(originalImageData, 0, 0)
+            // Clear and redraw with new scale
+            ctx.clearRect(0, 0, canvasSize.width, canvasSize.height)
+            ctx.drawImage(
+              tempCanvas,
+              originalBounds.x, originalBounds.y, originalBounds.width, originalBounds.height,
+              transformBounds.x, transformBounds.y, transformBounds.width, transformBounds.height
+            )
+          }
+        }
+        setIsResizing(false)
+        setResizeHandle(null)
+        setOriginalBounds(null)
+        setOriginalImageData(null)
+        // Update transform bounds after resize
+        const newBounds = getLayerBounds(activeLayer)
+        setTransformBounds(newBounds)
+      }
+      // Apply move if using move tool (not resizing)
+      else if (tool === "move" && moveStart && !isResizing && (layerOffset.x !== 0 || layerOffset.y !== 0)) {
         if (activeLayer?.canvas) {
           const ctx = activeLayer.canvas.getContext("2d")
           if (ctx) {
@@ -532,10 +762,15 @@ export function ImageEditorWindow() {
             }
           }
         }
-        setMoveStart(null)
-        setLayerOffset({ x: 0, y: 0 })
+        // Update transform bounds after move
+        if (activeLayer) {
+          const newBounds = getLayerBounds(activeLayer)
+          setTransformBounds(newBounds)
+        }
       }
 
+      setMoveStart(null)
+      setLayerOffset({ x: 0, y: 0 })
       setIsDrawing(false)
       setLastPoint(null)
       updateLayerThumbnail(activeLayerId)
@@ -995,6 +1230,34 @@ export function ImageEditorWindow() {
                         tool === "eraser" ? "cell" : "crosshair"
               }}
             />
+
+            {/* Transform Handles Overlay */}
+            {tool === "move" && transformBounds && !isDrawing && (
+              <div
+                className="absolute pointer-events-none"
+                style={{
+                  left: transformBounds.x,
+                  top: transformBounds.y,
+                  width: transformBounds.width,
+                  height: transformBounds.height,
+                }}
+              >
+                {/* Border */}
+                <div className="absolute inset-0 border-2 border-cyan-400 border-dashed" />
+
+                {/* Corner handles */}
+                <div className="absolute -left-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-nw-resize pointer-events-auto" />
+                <div className="absolute -right-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-ne-resize pointer-events-auto" />
+                <div className="absolute -left-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-sw-resize pointer-events-auto" />
+                <div className="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-se-resize pointer-events-auto" />
+
+                {/* Edge handles */}
+                <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-n-resize pointer-events-auto" />
+                <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-s-resize pointer-events-auto" />
+                <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-cyan-400 cursor-w-resize pointer-events-auto" />
+                <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-cyan-400 cursor-e-resize pointer-events-auto" />
+              </div>
+            )}
 
             {/* Text Input Overlay */}
             {showTextInput && (
