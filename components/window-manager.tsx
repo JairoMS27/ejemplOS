@@ -12,10 +12,11 @@ import { SnakeWindow } from "./apps/snake-window"
 import { SettingsWindow } from "./apps/settings-window"
 import { ProjectsFolder } from "./apps/projects-folder"
 import { EjPodWindow } from "./apps/ejpod-window"
+import { ImageEditorWindow } from "./apps/image-editor-window"
 
 interface OpenWindow {
   id: string
-  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ejpod"
+  type: "browser" | "minesweeper" | "finder" | "file" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ejpod" | "imageEditor"
   title: string
   zIndex: number
   fileName?: string
@@ -36,7 +37,7 @@ interface WindowManagerProps {
   onFocus: (id: string) => void
   onOpenFile?: (fileName: string, fileType: string, imageUrl?: string) => void
   onOpenGame?: (gameType: "minesweeper" | "tetris" | "2048" | "snake") => void
-  onOpenApp?: (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => void
+  onOpenApp?: (appType: "browser" | "paint" | "ejpod" | "settings" | "imageEditor", url?: string) => void
   onOpenFinder?: (path?: string) => void
   onOpenProjects?: () => void
   onMinimize?: (id: string) => void
@@ -141,6 +142,7 @@ export function WindowManager({
                 isMaximized={window.isMaximized}
               />
             )}
+            {window.type === "imageEditor" && <ImageEditorWindow />}
           </Window>
         )
       })}

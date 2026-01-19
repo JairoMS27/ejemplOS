@@ -8,7 +8,7 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu"
-import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings, FolderOpen, Music, Globe } from "lucide-react"
+import { RefreshCw, Monitor, DoorOpen, Gamepad2, Palette, Settings, FolderOpen, Music, Globe, Layers } from "lucide-react"
 import { DesktopIcon } from "./desktop-icon"
 import { useI18n } from "@/lib/i18n-context"
 
@@ -31,13 +31,14 @@ function useIsMobile() {
 interface DesktopProps {
   onOpenGamesFolder?: () => void
   onOpenProjectsFolder?: () => void
-  onOpenApp?: (appType: "browser" | "paint", url?: string) => void
+  onOpenApp?: (appType: "browser" | "paint" | "imageEditor", url?: string) => void
   onOpenSettings?: () => void
   onOpenEjPod?: () => void
   onOpenBrowser?: () => void
+  onOpenImageEditor?: () => void
 }
 
-export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, onOpenSettings, onOpenEjPod, onOpenBrowser }: DesktopProps) {
+export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, onOpenSettings, onOpenEjPod, onOpenBrowser, onOpenImageEditor }: DesktopProps) {
   const isMobile = useIsMobile()
   const { t } = useI18n()
   const [iconPositions, setIconPositions] = useState({
@@ -49,6 +50,7 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
     settings: { x: 50, y: 600 },
     ejpod: { x: 50, y: 710 },
     browser: { x: 50, y: 820 },
+    imageEditor: { x: 160, y: 50 },
   })
 
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
@@ -65,7 +67,7 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
     window.location.href = "https://twitter.com/ej3mplo"
   }
 
-  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "projects" | "paint" | "settings" | "ejpod" | "browser", position: { x: number; y: number }) => {
+  const updateIconPosition = (icon: "portfolio" | "twitter" | "games" | "projects" | "paint" | "settings" | "ejpod" | "browser" | "imageEditor", position: { x: number; y: number }) => {
     setIconPositions((prev) => ({
       ...prev,
       [icon]: position,
@@ -125,6 +127,12 @@ export function Desktop({ onOpenGamesFolder, onOpenProjectsFolder, onOpenApp, on
       icon: Globe,
       label: t.desktop.browser,
       onDoubleClick: onOpenBrowser,
+    },
+    {
+      id: "imageEditor",
+      icon: Layers,
+      label: t.desktop.imageEditor,
+      onDoubleClick: onOpenImageEditor,
     },
   ]
 
