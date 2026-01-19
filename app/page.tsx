@@ -83,7 +83,7 @@ function HomeContent() {
   const [openWindows, setOpenWindows] = useState<
     Array<{
       id: string
-      type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file" | "ejpod"
+      type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "file" | "ejpod" | "imageEditor"
       title: string
       zIndex: number
       fileName?: string
@@ -120,12 +120,13 @@ function HomeContent() {
       settings: t.windows.settings,
       ejpod: t.windows.ejpod,
       snake: t.windows.snake,
+      imageEditor: t.windows.imageEditor,
     }
     return titles[type] || type
   }
 
   const openApplication = (
-    type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ejpod",
+    type: "browser" | "minesweeper" | "finder" | "games" | "projects" | "tetris" | "2048" | "paint" | "snake" | "settings" | "ejpod" | "imageEditor",
     initialUrl?: string,
   ) => {
     const newWindow = {
@@ -145,11 +146,13 @@ function HomeContent() {
               ? { width: 700, height: 600 }
               : type === "paint"
                 ? { width: 900, height: 700 }
-                : type === "settings"
-                  ? { width: 800, height: 600 }
-                  : type === "ejpod"
-                    ? { width: 320, height: 580 }
-                    : { width: 900, height: 600 },
+                : type === "imageEditor"
+                  ? { width: 1100, height: 750 }
+                  : type === "settings"
+                    ? { width: 800, height: 600 }
+                    : type === "ejpod"
+                      ? { width: 320, height: 580 }
+                      : { width: 900, height: 600 },
       savedPosition: { x: 100 + openWindows.length * 30, y: 100 + openWindows.length * 30 },
     }
     setOpenWindows([...openWindows, newWindow])
@@ -204,7 +207,7 @@ function HomeContent() {
     setOpenWindows([...openWindows, newWindow])
   }
 
-  const openApp = (appType: "browser" | "paint" | "ejpod" | "settings", url?: string) => {
+  const openApp = (appType: "browser" | "paint" | "ejpod" | "settings" | "imageEditor", url?: string) => {
     openApplication(appType, url)
   }
 
@@ -284,7 +287,7 @@ function HomeContent() {
       <div className="relative z-10 w-full h-full flex flex-col">
         {/* Desktop area */}
         <div className="flex-1 overflow-hidden relative">
-          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} onOpenEjPod={() => openApplication("ejpod")} onOpenBrowser={() => openApplication("browser")} />
+          <Desktop onOpenGamesFolder={openGamesFolder} onOpenProjectsFolder={openProjectsFolder} onOpenApp={openApp} onOpenSettings={() => openApplication("settings")} onOpenEjPod={() => openApplication("ejpod")} onOpenBrowser={() => openApplication("browser")} onOpenImageEditor={() => openApplication("imageEditor")} />
 
           {/* Windows */}
           <WindowManager

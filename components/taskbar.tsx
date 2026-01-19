@@ -16,12 +16,13 @@ import {
   Music,
   Palette,
   Settings,
+  Layers,
 } from "lucide-react"
 import { useAudio } from "@/lib/audio-context"
 import { useI18n } from "@/lib/i18n-context"
 
 interface TaskBarProps {
-  onAppClick: (app: "browser" | "games" | "finder" | "paint" | "settings" | "ejpod") => void
+  onAppClick: (app: "browser" | "games" | "finder" | "paint" | "settings" | "ejpod" | "imageEditor") => void
   minimizedWindows?: Array<{ id: string; title: string }>
   onRestoreWindow?: (id: string) => void
 }
@@ -71,6 +72,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
     { id: "finder", icon: Folder, label: t.taskbar.finder, type: "finder" as const },
     { id: "ejpod", icon: Music, label: t.taskbar.ejpod, type: "ejpod" as const },
     { id: "paint", icon: Palette, label: t.taskbar.paint, type: "paint" as const },
+    { id: "imageEditor", icon: Layers, label: t.taskbar.imageEditor, type: "imageEditor" as const },
     { id: "games", icon: Gamepad2, label: t.taskbar.games, type: "games" as const },
     { id: "settings", icon: Settings, label: t.taskbar.settings, type: "settings" as const },
   ]
