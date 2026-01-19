@@ -357,6 +357,162 @@ export function ImageEditorWindow() {
     }
   }, [tool, activeLayerId, layers, getLayerBounds])
 
+  // Global mouse event handlers for resize operations
+  useEffect(() => {
+    if (!isDrawing || !isResizing) return
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      const rect = mainCanvasRef.current?.getBoundingClientRect()
+      if (!rect) return
+
+      const scaleX = canvasSize.width / rect.width
+      const scaleY = canvasSize.height / rect.height
+      const x = (e.clientX - rect.left) * scaleX
+      const y = (e.clientY - rect.top) * scaleY
+
+      if (!resizeHandle || !originalBounds || !moveStart || !originalImageData) return
+
+      const activeLayer = getActiveLayer()
+      if (!activeLayer?.canvas || !activeLayer.visible) return
+
+      const deltaX = x - moveStart.x
+      const deltaY = y - moveStart.y
+
+      let newBounds = { ...originalBounds }
+
+      // Calculate new bounds based on which handle is being dragged
+      switch (resizeHandle) {
+        case "nw":
+          newBounds.x = originalBounds.x + deltaX
+          newBounds.y = originalBounds.y + deltaY
+          newBounds.width = originalBounds.width - deltaX
+          newBounds.height = originalBounds.height - deltaY
+          break
+        case "ne":
+          newBounds.y = originalBounds.y + deltaY
+          newBounds.width = originalBounds.width + deltaX
+          newBounds.height = originalBounds.height - deltaY
+          break
+        case "sw":
+          newBounds.x = originalBounds.x + deltaX
+          newBounds.width = originalBounds.width - deltaX
+          newBounds.height = originalBounds.height + deltaY
+          break
+        case "se":
+          newBounds.width = originalBounds.width + deltaX
+          newBounds.height = originalBounds.height + deltaY
+          break
+        case "n":
+          newBounds.y = originalBounds.y + deltaY
+          newBounds.height = originalBounds.height - deltaY
+          break
+        case "s":
+          newBounds.height = originalBounds.height + deltaY
+          break
+        case "w":
+          newBounds.x = originalBounds.x + deltaX
+          newBounds.width = originalBounds.width - deltaX
+          break
+        case "e":
+          newBounds.width = originalBounds.width + deltaX
+          break
+      }
+
+      // Ensure minimum size
+      if (newBounds.width < 10) newBounds.width = 10
+      if (newBounds.height < 10) newBounds.height = 10
+
+      setTransformBounds(newBounds)
+
+      // Preview the scaled image
+      const mainCanvas = mainCanvasRef.current
+      if (!mainCanvas) return
+      const mainCtx = mainCanvas.getContext("2d")
+      if (!mainCtx) return
+
+      // Clear and draw checkerboard
+      mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height)
+      const patternSize = 10
+      for (let px = 0; px < mainCanvas.width; px += patternSize) {
+        for (let py = 0; py < mainCanvas.height; py += patternSize) {
+          mainCtx.fillStyle = ((px + py) / patternSize) % 2 === 0 ? "#2a2a2a" : "#3a3a3a"
+          mainCtx.fillRect(px, py, patternSize, patternSize)
+        }
+      }
+
+      // Draw other layers
+      layers.forEach(layer => {
+        if (layer.visible && layer.canvas && layer.id !== activeLayerId) {
+          mainCtx.globalAlpha = layer.opacity / 100
+          mainCtx.drawImage(layer.canvas, 0, 0)
+        }
+      })
+
+      // Draw scaled active layer
+      const tempCanvas = document.createElement("canvas")
+      tempCanvas.width = canvasSize.width
+      tempCanvas.height = canvasSize.height
+      const tempCtx = tempCanvas.getContext("2d")
+      if (tempCtx) {
+        tempCtx.putImageData(originalImageData, 0, 0)
+        mainCtx.globalAlpha = activeLayer.opacity / 100
+        // Scale from original bounds to new bounds
+        mainCtx.drawImage(
+          tempCanvas,
+          originalBounds.x, originalBounds.y, originalBounds.width, originalBounds.height,
+          newBounds.x, newBounds.y, newBounds.width, newBounds.height
+        )
+      }
+      mainCtx.globalAlpha = 1
+    }
+
+    const handleGlobalMouseUp = () => {
+      if (isResizing && originalBounds && transformBounds && originalImageData) {
+        const activeLayer = getActiveLayer()
+        if (activeLayer?.canvas) {
+          const ctx = activeLayer.canvas.getContext("2d")
+          if (ctx) {
+            // Create temp canvas with original content
+            const tempCanvas = document.createElement("canvas")
+            tempCanvas.width = canvasSize.width
+            tempCanvas.height = canvasSize.height
+            const tempCtx = tempCanvas.getContext("2d")
+            if (tempCtx) {
+              tempCtx.putImageData(originalImageData, 0, 0)
+              // Clear and redraw with new scale
+              ctx.clearRect(0, 0, canvasSize.width, canvasSize.height)
+              ctx.drawImage(
+                tempCanvas,
+                originalBounds.x, originalBounds.y, originalBounds.width, originalBounds.height,
+                transformBounds.x, transformBounds.y, transformBounds.width, transformBounds.height
+              )
+            }
+          }
+          updateLayerThumbnail(activeLayerId)
+          // Update transform bounds after resize
+          const newBounds = getLayerBounds(activeLayer)
+          setTransformBounds(newBounds)
+        }
+      }
+      setIsResizing(false)
+      setResizeHandle(null)
+      setOriginalBounds(null)
+      setOriginalImageData(null)
+      setMoveStart(null)
+      setIsDrawing(false)
+      saveToHistory()
+      renderComposite()
+    }
+
+    document.addEventListener("mousemove", handleGlobalMouseMove)
+    document.addEventListener("mouseup", handleGlobalMouseUp)
+
+    return () => {
+      document.removeEventListener("mousemove", handleGlobalMouseMove)
+      document.removeEventListener("mouseup", handleGlobalMouseUp)
+    }
+  }, [isDrawing, isResizing, resizeHandle, originalBounds, moveStart, originalImageData, transformBounds, layers, activeLayerId, canvasSize, getActiveLayer, getLayerBounds, updateLayerThumbnail, saveToHistory, renderComposite])
+
   const drawLine = (ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) => {
     ctx.beginPath()
     ctx.moveTo(x1, y1)
@@ -1246,16 +1402,184 @@ export function ImageEditorWindow() {
                 <div className="absolute inset-0 border-2 border-cyan-400 border-dashed" />
 
                 {/* Corner handles */}
-                <div className="absolute -left-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-nw-resize pointer-events-auto" />
-                <div className="absolute -right-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-ne-resize pointer-events-auto" />
-                <div className="absolute -left-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-sw-resize pointer-events-auto" />
-                <div className="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-se-resize pointer-events-auto" />
+                <div
+                  className="absolute -left-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-nw-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("nw")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
+                <div
+                  className="absolute -right-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-ne-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("ne")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
+                <div
+                  className="absolute -left-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-sw-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("sw")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
+                <div
+                  className="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-se-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("se")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
 
                 {/* Edge handles */}
-                <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-n-resize pointer-events-auto" />
-                <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-s-resize pointer-events-auto" />
-                <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-cyan-400 cursor-w-resize pointer-events-auto" />
-                <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-cyan-400 cursor-e-resize pointer-events-auto" />
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-n-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("n")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-white border-2 border-cyan-400 cursor-s-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("s")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
+                <div
+                  className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-cyan-400 cursor-w-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("w")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
+                <div
+                  className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-cyan-400 cursor-e-resize pointer-events-auto"
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    const activeLayer = getActiveLayer()
+                    if (!activeLayer?.canvas) return
+                    setResizeHandle("e")
+                    setIsResizing(true)
+                    const rect = mainCanvasRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const scaleX = canvasSize.width / rect.width
+                      const scaleY = canvasSize.height / rect.height
+                      setMoveStart({ x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY })
+                    }
+                    setOriginalBounds({ ...transformBounds })
+                    const layerCtx = activeLayer.canvas.getContext("2d")
+                    if (layerCtx) {
+                      setOriginalImageData(layerCtx.getImageData(0, 0, canvasSize.width, canvasSize.height))
+                    }
+                    setIsDrawing(true)
+                  }}
+                />
               </div>
             )}
 
