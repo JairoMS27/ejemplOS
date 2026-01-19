@@ -378,6 +378,32 @@ export function ImageEditorWindow() {
     }
 
     if (tool === "move") {
+      // Auto-select layer: find topmost layer with non-transparent pixel at click position
+      const pixelX = Math.floor(x)
+      const pixelY = Math.floor(y)
+
+      // Check layers from top to bottom (reverse order)
+      let selectedLayerId = activeLayerId
+      for (let i = layers.length - 1; i >= 0; i--) {
+        const layer = layers[i]
+        if (!layer.visible || !layer.canvas) continue
+
+        const layerCtx = layer.canvas.getContext("2d")
+        if (!layerCtx) continue
+
+        const pixelData = layerCtx.getImageData(pixelX, pixelY, 1, 1).data
+        // Check if pixel has alpha > 0 (not transparent)
+        if (pixelData[3] > 0) {
+          selectedLayerId = layer.id
+          break
+        }
+      }
+
+      // Switch to the detected layer if different
+      if (selectedLayerId !== activeLayerId) {
+        setActiveLayerId(selectedLayerId)
+      }
+
       setMoveStart({ x, y })
       setLayerOffset({ x: 0, y: 0 })
       setIsDrawing(true)
