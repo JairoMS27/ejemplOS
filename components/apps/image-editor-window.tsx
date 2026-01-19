@@ -120,19 +120,6 @@ export function ImageEditorWindow() {
     }
   }, [showTextInput])
 
-  // Update transform bounds when tool changes to move or active layer changes
-  useEffect(() => {
-    if (tool === "move") {
-      const activeLayer = layers.find(l => l.id === activeLayerId)
-      if (activeLayer) {
-        const bounds = getLayerBounds(activeLayer)
-        setTransformBounds(bounds)
-      }
-    } else {
-      setTransformBounds(null)
-    }
-  }, [tool, activeLayerId, layers, getLayerBounds])
-
   const createNewLayer = (name?: string): Layer => {
     const id = `layer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     const canvas = document.createElement("canvas")
@@ -356,6 +343,19 @@ export function ImageEditorWindow() {
 
     return null
   }
+
+  // Update transform bounds when tool changes to move or active layer changes
+  useEffect(() => {
+    if (tool === "move") {
+      const activeLayer = layers.find(l => l.id === activeLayerId)
+      if (activeLayer) {
+        const bounds = getLayerBounds(activeLayer)
+        setTransformBounds(bounds)
+      }
+    } else {
+      setTransformBounds(null)
+    }
+  }, [tool, activeLayerId, layers, getLayerBounds])
 
   const drawLine = (ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) => {
     ctx.beginPath()
