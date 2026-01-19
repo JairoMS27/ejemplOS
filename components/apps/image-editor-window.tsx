@@ -89,6 +89,8 @@ export function ImageEditorWindow() {
   const [fontSize, setFontSize] = useState(24)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textInputRef = useRef<HTMLInputElement>(null)
+  const [moveStart, setMoveStart] = useState<{ x: number; y: number } | null>(null)
+  const [layerOffset, setLayerOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
 
   // Create initial layer
   useEffect(() => {
@@ -375,6 +377,13 @@ export function ImageEditorWindow() {
       return
     }
 
+    if (tool === "move") {
+      setMoveStart({ x, y })
+      setLayerOffset({ x: 0, y: 0 })
+      setIsDrawing(true)
+      return
+    }
+
     const ctx = activeLayer.canvas.getContext("2d")
     if (!ctx) return
 
@@ -409,10 +418,49 @@ export function ImageEditorWindow() {
     const { x, y } = getCanvasCoords(e)
     setCursorPos({ x: Math.round(x), y: Math.round(y) })
 
-    if (!isDrawing || !lastPoint) return
+    if (!isDrawing) return
 
     const activeLayer = getActiveLayer()
     if (!activeLayer?.canvas || !activeLayer.visible) return
+
+    // Handle move tool
+    if (tool === "move" && moveStart) {
+      const offsetX = x - moveStart.x
+      const offsetY = y - moveStart.y
+      setLayerOffset({ x: offsetX, y: offsetY })
+
+      // Re-render with offset preview
+      const mainCanvas = mainCanvasRef.current
+      if (!mainCanvas) return
+      const mainCtx = mainCanvas.getContext("2d")
+      if (!mainCtx) return
+
+      // Clear and draw checkerboard
+      mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height)
+      const patternSize = 10
+      for (let px = 0; px < mainCanvas.width; px += patternSize) {
+        for (let py = 0; py < mainCanvas.height; py += patternSize) {
+          mainCtx.fillStyle = ((px + py) / patternSize) % 2 === 0 ? "#2a2a2a" : "#3a3a3a"
+          mainCtx.fillRect(px, py, patternSize, patternSize)
+        }
+      }
+
+      // Draw layers with offset for active layer
+      layers.forEach(layer => {
+        if (layer.visible && layer.canvas) {
+          mainCtx.globalAlpha = layer.opacity / 100
+          if (layer.id === activeLayerId) {
+            mainCtx.drawImage(layer.canvas, offsetX, offsetY)
+          } else {
+            mainCtx.drawImage(layer.canvas, 0, 0)
+          }
+        }
+      })
+      mainCtx.globalAlpha = 1
+      return
+    }
+
+    if (!lastPoint) return
 
     const ctx = activeLayer.canvas.getContext("2d")
     if (!ctx) return
@@ -439,10 +487,34 @@ export function ImageEditorWindow() {
 
   const stopDrawing = () => {
     if (isDrawing) {
+      // Apply move if using move tool
+      if (tool === "move" && moveStart && (layerOffset.x !== 0 || layerOffset.y !== 0)) {
+        const activeLayer = getActiveLayer()
+        if (activeLayer?.canvas) {
+          const ctx = activeLayer.canvas.getContext("2d")
+          if (ctx) {
+            // Create temp canvas with current content
+            const tempCanvas = document.createElement("canvas")
+            tempCanvas.width = canvasSize.width
+            tempCanvas.height = canvasSize.height
+            const tempCtx = tempCanvas.getContext("2d")
+            if (tempCtx) {
+              tempCtx.drawImage(activeLayer.canvas, 0, 0)
+              // Clear and redraw with offset
+              ctx.clearRect(0, 0, canvasSize.width, canvasSize.height)
+              ctx.drawImage(tempCanvas, layerOffset.x, layerOffset.y)
+            }
+          }
+        }
+        setMoveStart(null)
+        setLayerOffset({ x: 0, y: 0 })
+      }
+
       setIsDrawing(false)
       setLastPoint(null)
       updateLayerThumbnail(activeLayerId)
       saveToHistory()
+      renderComposite()
     }
   }
 
@@ -675,6 +747,7 @@ export function ImageEditorWindow() {
   }
 
   const tools: { id: Tool; icon: React.ReactNode; label: string }[] = [
+    { id: "move", icon: <Move className="w-4 h-4" />, label: t.imageEditor?.tools?.move || "Mover" },
     { id: "brush", icon: <Pencil className="w-4 h-4" />, label: t.imageEditor?.tools?.brush || "Pincel" },
     { id: "eraser", icon: <Eraser className="w-4 h-4" />, label: t.imageEditor?.tools?.eraser || "Borrador" },
     { id: "fill", icon: <PaintBucket className="w-4 h-4" />, label: t.imageEditor?.tools?.fill || "Rellenar" },
@@ -892,6 +965,7 @@ export function ImageEditorWindow() {
                 cursor: tool === "eyedropper" ? "crosshair" :
                         tool === "fill" ? "cell" :
                         tool === "text" ? "text" :
+                        tool === "move" ? "move" :
                         tool === "eraser" ? "cell" : "crosshair"
               }}
             />
@@ -1061,19 +1135,22 @@ export function ImageEditorWindow() {
               {/* Layer Controls - show when active */}
               {layer.id === activeLayerId && (
                 <div className="mt-2 space-y-2">
-                  {/* Opacity Slider */}
+                  {/* Opacity Input */}
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-zinc-500 w-12">{t.imageEditor?.opacity || "Opacidad"}</span>
+                    <span className="text-[10px] text-zinc-500">{t.imageEditor?.opacity || "Opacidad"}</span>
                     <input
-                      type="range"
+                      type="number"
                       min="0"
                       max="100"
                       value={layer.opacity}
-                      onChange={(e) => updateLayerOpacity(layer.id, Number(e.target.value))}
-                      className="flex-1 accent-white h-1"
+                      onChange={(e) => {
+                        const val = Math.max(0, Math.min(100, Number(e.target.value) || 0))
+                        updateLayerOpacity(layer.id, val)
+                      }}
                       onClick={(e) => e.stopPropagation()}
+                      className="w-14 px-2 py-0.5 text-xs bg-zinc-800 border border-white/10 rounded text-white text-center"
                     />
-                    <span className="text-[10px] text-zinc-400 w-7">{layer.opacity}%</span>
+                    <span className="text-[10px] text-zinc-500">%</span>
                   </div>
 
                   {/* Layer Actions */}
