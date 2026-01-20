@@ -301,7 +301,7 @@ export function ProjectsFolder({ onOpenProject, onOpenFinder, onOpenApp, isMaxim
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 auto-rows-min">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 auto-rows-min">
               {currentProjects.map((project) => (
                 <div
                   key={project.id}
@@ -313,13 +313,13 @@ export function ProjectsFolder({ onOpenProject, onOpenFinder, onOpenApp, isMaxim
                     e.stopPropagation()
                     onOpenProject?.(project.url)
                   }}
-                  className={`group flex flex-col items-center gap-2 rounded-lg p-4 transition-all cursor-default border ${
+                  className={`group flex flex-col items-center gap-1 sm:gap-2 rounded-lg p-2 sm:p-4 transition-all cursor-default border ${
                     selectedProject === project.id
                       ? "bg-white/10 border-white/20 shadow-lg shadow-black/20"
                       : "hover:bg-white/5 border-transparent hover:border-white/5"
                   }`}
                 >
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all ${
                       selectedProject === project.id
                         ? "bg-zinc-700/50"
@@ -330,15 +330,15 @@ export function ProjectsFolder({ onOpenProject, onOpenFinder, onOpenApp, isMaxim
                       />
                     </div>
                   </div>
-                  <div className="flex flex-col items-center text-center w-full">
+                  <div className="flex flex-col items-center text-center w-full min-w-0">
                     <span
-                      className={`text-xs font-medium truncate w-full px-1 rounded ${
+                      className={`text-[10px] sm:text-xs font-medium truncate w-full px-0.5 sm:px-1 rounded ${
                         selectedProject === project.id ? "text-white" : "text-zinc-300 group-hover:text-white"
                       }`}
                     >
                       {project.name}
                     </span>
-                    <span className="text-[10px] text-zinc-500 mt-0.5">{project.category}</span>
+                    <span className="text-[8px] sm:text-[10px] text-zinc-500 mt-0.5">{project.category}</span>
                   </div>
                 </div>
               ))}

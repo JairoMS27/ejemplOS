@@ -354,6 +354,7 @@ export const es = {
     userSubtitle: "Este nombre aparecera en tu sistema",
     userName: "Tu nombre",
     userPlaceholder: "Escribe tu nombre...",
+    nameRequired: "El nombre es obligatorio",
 
     // Step 3: Theme
     themeTitle: "Personaliza tu escritorio",

@@ -84,7 +84,7 @@ export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto bg-black/20 p-4" onClick={() => setSelectedGame(null)}>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 auto-rows-min">
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 auto-rows-min">
             {games.map((game) => (
               <div
                 key={game.id}
@@ -96,26 +96,26 @@ export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
                   e.stopPropagation()
                   onOpenGame?.(game.type)
                 }}
-                className={`group flex flex-col items-center gap-2 rounded-lg p-4 transition-all cursor-default border ${
+                className={`group flex flex-col items-center gap-1 sm:gap-2 rounded-lg p-2 sm:p-4 transition-all cursor-default border ${
                   selectedGame === game.id
                     ? "bg-white/10 border-white/20 shadow-lg shadow-black/20"
                     : "hover:bg-white/5 border-transparent hover:border-white/5"
                 }`}
               >
-                <div className="relative p-2">
+                <div className="relative p-1 sm:p-2">
                   <game.Icon
                     className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 ${selectedGame === game.id ? "text-white" : "text-zinc-300 group-hover:text-white"} transition-colors`}
                   />
                 </div>
-                <div className="flex flex-col items-center text-center w-full">
+                <div className="flex flex-col items-center text-center w-full min-w-0">
                   <span
-                    className={`text-xs font-medium truncate w-full px-1 rounded ${
+                    className={`text-[10px] sm:text-xs font-medium truncate w-full px-0.5 sm:px-1 rounded ${
                       selectedGame === game.id ? "text-white" : "text-zinc-300 group-hover:text-white"
                     }`}
                   >
                     {game.name}
                   </span>
-                  <span className="text-[10px] text-zinc-500 mt-0.5">{game.category}</span>
+                  <span className="text-[8px] sm:text-[10px] text-zinc-500 mt-0.5">{game.category}</span>
                 </div>
               </div>
             ))}

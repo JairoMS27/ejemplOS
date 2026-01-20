@@ -219,7 +219,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                 <div className="flex items-center gap-4">
                   <span className="text-3xl">🇪🇸</span>
                   <div className="text-left">
-                    <p className="font-medium text-white">Espanol</p>
+                    <p className="font-medium text-white">Español</p>
                     <p className="text-sm text-white/40">Spanish</p>
                   </div>
                 </div>
@@ -263,16 +263,21 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
             <div className="mb-8">
               <label className="block text-sm text-white/40 mb-2">
-                {t.setup.userName}
+                {t.setup.userName} <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 placeholder={t.setup.userPlaceholder}
-                className="w-full px-4 py-4 bg-white/5 border-2 border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-colors text-lg"
+                className={`w-full px-4 py-4 bg-white/5 border-2 rounded-xl text-white placeholder-white/30 focus:outline-none transition-colors text-lg ${
+                  userName.trim() ? "border-white/10 focus:border-white/40" : "border-white/10 focus:border-white/40"
+                }`}
                 autoFocus
               />
+              {!userName.trim() && (
+                <p className="text-white/40 text-xs mt-2">{t.setup.nameRequired}</p>
+              )}
             </div>
 
             <div className="flex justify-between">
@@ -285,7 +290,12 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               </button>
               <button
                 onClick={goNext}
-                className="flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-white/90 transition-all"
+                disabled={!userName.trim()}
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-xl transition-all ${
+                  userName.trim()
+                    ? "bg-white text-black hover:bg-white/90"
+                    : "bg-white/20 text-white/40 cursor-not-allowed"
+                }`}
               >
                 {t.setup.next}
                 <ChevronRight className="w-5 h-5" />
