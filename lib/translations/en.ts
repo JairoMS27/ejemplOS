@@ -354,6 +354,7 @@ export const en = {
     userSubtitle: "This name will appear on your system",
     userName: "Your name",
     userPlaceholder: "Enter your name...",
+    nameRequired: "Name is required",
 
     // Step 3: Theme
     themeTitle: "Customize your desktop",

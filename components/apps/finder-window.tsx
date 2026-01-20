@@ -561,7 +561,7 @@ export function FinderWindow({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 auto-rows-min">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 auto-rows-min">
               {currentFiles.map((item, idx) => (
                 <div
                   key={idx}
@@ -573,29 +573,29 @@ export function FinderWindow({
                     e.stopPropagation()
                     handleDoubleClick(item)
                   }}
-                  className={`group flex flex-col items-center gap-2 rounded-lg p-4 transition-all cursor-default border ${
+                  className={`group flex flex-col items-center gap-1 sm:gap-2 rounded-lg p-2 sm:p-4 transition-all cursor-default border ${
                     selectedItem === item.name
                       ? "bg-white/10 border-white/20 shadow-lg shadow-black/20"
                       : "hover:bg-white/5 border-transparent hover:border-white/5"
                   }`}
                 >
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     {item.icon}
                     {item.type === "folder" && (
                       <div className="absolute -bottom-1 -right-1 bg-zinc-900 rounded-full p-0.5 border border-zinc-800">
-                        <div className="w-2 h-2 bg-zinc-500 rounded-full" />
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-zinc-500 rounded-full" />
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-col items-center text-center w-full">
+                  <div className="flex flex-col items-center text-center w-full min-w-0">
                     <span
-                      className={`text-xs font-medium truncate w-full px-1 rounded ${
+                      className={`text-[10px] sm:text-xs font-medium truncate w-full px-0.5 sm:px-1 rounded ${
                         selectedItem === item.name ? "text-white" : "text-zinc-300 group-hover:text-white"
                       }`}
                     >
                       {item.name}
                     </span>
-                    <span className="text-[10px] text-zinc-500 mt-0.5">{item.size || "Carpeta"}</span>
+                    <span className="text-[8px] sm:text-[10px] text-zinc-500 mt-0.5 truncate w-full">{item.size || "Carpeta"}</span>
                   </div>
                 </div>
               ))}
