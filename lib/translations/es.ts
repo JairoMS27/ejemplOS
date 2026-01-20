@@ -325,10 +325,29 @@ export const es = {
     showGrid: "Mostrar cuadricula",
     showWatermark: "Mostrar marca de agua",
 
+    // Step 4: PIN
+    pinTitle: "Protege tu sistema",
+    pinSubtitle: "Configura un PIN para proteger tus datos",
+    enablePin: "Activar bloqueo con PIN",
+    pinLabel: "Introduce un PIN de 4 digitos",
+    pinPlaceholder: "0000",
+    confirmPinLabel: "Confirma tu PIN",
+    pinMismatch: "Los PIN no coinciden",
+    pinOptional: "Este paso es opcional",
+
     // Final
     allSet: "Todo listo!",
     allSetSubtitle: "Tu sistema esta configurado y listo para usar",
     enjoyMessage: "Disfruta de EjemplOS",
+  },
+
+  // Lock Screen
+  lockScreen: {
+    title: "EjemplOS",
+    subtitle: "Introduce tu PIN para desbloquear",
+    unlock: "Desbloquear",
+    wrongPin: "PIN incorrecto",
+    welcome: "Bienvenido de nuevo",
   },
 
   // Changelog

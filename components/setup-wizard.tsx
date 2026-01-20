@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, ChevronRight, ChevronLeft, User, Languages, Palette } from "lucide-react"
+import { Check, ChevronRight, ChevronLeft, User, Languages, Palette, Lock } from "lucide-react"
 import { useSettings } from "@/lib/settings-context"
 import { useI18n } from "@/lib/i18n-context"
 
@@ -9,18 +9,22 @@ interface SetupWizardProps {
   onComplete: () => void
 }
 
-type Step = "welcome" | "language" | "user" | "theme" | "complete"
+type Step = "welcome" | "language" | "user" | "theme" | "pin" | "complete"
 
 export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [currentStep, setCurrentStep] = useState<Step>("welcome")
   const [userName, setUserName] = useState("")
   const [showGrid, setShowGrid] = useState(true)
   const [showWatermark, setShowWatermark] = useState(true)
+  const [pinEnabled, setPinEnabled] = useState(false)
+  const [pin, setPin] = useState("")
+  const [confirmPin, setConfirmPin] = useState("")
+  const [pinError, setPinError] = useState(false)
 
   const { updateUser, updateDesktop, completeSetup } = useSettings()
   const { t, language, setLanguage } = useI18n()
 
-  const steps: Step[] = ["welcome", "language", "user", "theme", "complete"]
+  const steps: Step[] = ["welcome", "language", "user", "theme", "pin", "complete"]
   const currentStepIndex = steps.indexOf(currentStep)
 
   const goNext = () => {
@@ -37,16 +41,31 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     }
   }
 
+  const handlePinNext = () => {
+    if (pinEnabled) {
+      if (pin.length !== 4 || pin !== confirmPin) {
+        setPinError(true)
+        return
+      }
+    }
+    setPinError(false)
+    goNext()
+  }
+
   const handleFinish = () => {
-    updateUser({ name: userName || "User" })
+    updateUser({
+      name: userName || "User",
+      pinEnabled: pinEnabled,
+      pin: pinEnabled ? pin : "",
+    })
     updateDesktop({ showGrid, showWatermark })
     completeSetup()
     onComplete()
   }
 
   const renderStepIndicator = () => {
-    const visibleSteps: Step[] = ["language", "user", "theme"]
-    const currentVisibleIndex = visibleSteps.indexOf(currentStep as "language" | "user" | "theme")
+    const visibleSteps: Step[] = ["language", "user", "theme", "pin"]
+    const currentVisibleIndex = visibleSteps.indexOf(currentStep as "language" | "user" | "theme" | "pin")
 
     if (currentStep === "welcome" || currentStep === "complete") return null
 
@@ -318,6 +337,127 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               </button>
               <button
                 onClick={goNext}
+                className="flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-white/90 transition-all"
+              >
+                {t.setup.next}
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* PIN Step */}
+        {currentStep === "pin" && (
+          <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-6 border border-white/20 rounded-xl flex items-center justify-center">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {t.setup.pinTitle}
+              </h2>
+              <p className="text-white/60">
+                {t.setup.pinSubtitle}
+              </p>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              {/* Enable PIN toggle */}
+              <button
+                onClick={() => {
+                  setPinEnabled(!pinEnabled)
+                  setPinError(false)
+                  if (pinEnabled) {
+                    setPin("")
+                    setConfirmPin("")
+                  }
+                }}
+                className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                  pinEnabled
+                    ? "bg-white/10 border-white"
+                    : "border-white/10 hover:border-white/30"
+                }`}
+              >
+                <span className="text-white">{t.setup.enablePin}</span>
+                <div
+                  className={`w-10 h-6 rounded-full transition-colors ${
+                    pinEnabled ? "bg-white" : "bg-white/20"
+                  }`}
+                >
+                  <div
+                    className={`w-4 h-4 rounded-full bg-black transition-transform mt-1 ${
+                      pinEnabled ? "translate-x-5 ml-0" : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </button>
+
+              {/* PIN inputs */}
+              {pinEnabled && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div>
+                    <label className="block text-sm text-white/40 mb-2">
+                      {t.setup.pinLabel}
+                    </label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={pin}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "")
+                        setPin(value)
+                        setPinError(false)
+                      }}
+                      placeholder={t.setup.pinPlaceholder}
+                      className="w-full px-4 py-4 bg-white/5 border-2 border-white/10 rounded-xl text-white text-center text-2xl tracking-[1em] placeholder-white/30 focus:outline-none focus:border-white/40 transition-colors font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-white/40 mb-2">
+                      {t.setup.confirmPinLabel}
+                    </label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={confirmPin}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "")
+                        setConfirmPin(value)
+                        setPinError(false)
+                      }}
+                      placeholder={t.setup.pinPlaceholder}
+                      className={`w-full px-4 py-4 bg-white/5 border-2 rounded-xl text-white text-center text-2xl tracking-[1em] placeholder-white/30 focus:outline-none transition-colors font-mono ${
+                        pinError ? "border-red-500" : "border-white/10 focus:border-white/40"
+                      }`}
+                    />
+                  </div>
+                  {pinError && (
+                    <p className="text-red-400 text-sm text-center animate-in fade-in duration-200">
+                      {t.setup.pinMismatch}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!pinEnabled && (
+                <p className="text-white/40 text-sm text-center">
+                  {t.setup.pinOptional}
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-between">
+              <button
+                onClick={goBack}
+                className="flex items-center gap-2 px-6 py-3 text-white/60 hover:text-white transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                {t.setup.back}
+              </button>
+              <button
+                onClick={handlePinNext}
                 className="flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-white/90 transition-all"
               >
                 {t.setup.next}
