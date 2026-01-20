@@ -684,7 +684,7 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
             </SettingsCard>
 
             <div className="text-center text-xs text-zinc-600 py-4">
-              <p>© 2025 {t.settings.about.copyright}</p>
+              <p>© 2026 {t.settings.about.copyright}</p>
             </div>
           </div>
         )}

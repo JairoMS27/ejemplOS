@@ -18,11 +18,17 @@ export interface DesktopSettings {
   watermarkOpacity: number
 }
 
+export interface UserSettings {
+  name: string
+  setupCompleted: boolean
+}
+
 export interface SystemSettings {
   wallpaper: WallpaperSettings
   desktop: DesktopSettings
   animations: boolean
   accentColor: string
+  user: UserSettings
 }
 
 interface SettingsContextType {
@@ -30,6 +36,8 @@ interface SettingsContextType {
   updateWallpaper: (wallpaper: Partial<WallpaperSettings>) => void
   updateDesktop: (desktop: Partial<DesktopSettings>) => void
   updateSettings: (newSettings: Partial<SystemSettings>) => void
+  updateUser: (user: Partial<UserSettings>) => void
+  completeSetup: () => void
   resetSettings: () => void
   getStorageUsage: () => { used: number; items: number }
   clearStorage: () => void
@@ -51,6 +59,10 @@ const defaultSettings: SystemSettings = {
   },
   animations: true,
   accentColor: "#3b82f6",
+  user: {
+    name: "",
+    setupCompleted: false,
+  },
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
@@ -104,6 +116,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setSettings((prev) => ({ ...prev, ...newSettings }))
   }, [])
 
+  const updateUser = useCallback((user: Partial<UserSettings>) => {
+    setSettings((prev) => ({
+      ...prev,
+      user: { ...prev.user, ...user },
+    }))
+  }, [])
+
+  const completeSetup = useCallback(() => {
+    setSettings((prev) => ({
+      ...prev,
+      user: { ...prev.user, setupCompleted: true },
+    }))
+  }, [])
+
   const resetSettings = useCallback(() => {
     setSettings(defaultSettings)
   }, [])
@@ -142,6 +168,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         updateWallpaper,
         updateDesktop,
         updateSettings,
+        updateUser,
+        completeSetup,
         resetSettings,
         getStorageUsage,
         clearStorage,

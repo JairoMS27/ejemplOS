@@ -299,6 +299,38 @@ export const es = {
     enterText: "Escribe...",
   },
 
+  // Setup Wizard
+  setup: {
+    welcome: "Bienvenido a EjemplOS",
+    welcomeSubtitle: "Vamos a configurar tu sistema operativo",
+    letsStart: "Comenzar",
+    next: "Siguiente",
+    back: "Atras",
+    finish: "Finalizar",
+    skip: "Omitir",
+
+    // Step 1: Language
+    languageTitle: "Elige tu idioma",
+    languageSubtitle: "Selecciona el idioma del sistema",
+
+    // Step 2: User
+    userTitle: "Como te llamas?",
+    userSubtitle: "Este nombre aparecera en tu sistema",
+    userName: "Tu nombre",
+    userPlaceholder: "Escribe tu nombre...",
+
+    // Step 3: Theme
+    themeTitle: "Personaliza tu escritorio",
+    themeSubtitle: "Elige como quieres que se vea",
+    showGrid: "Mostrar cuadricula",
+    showWatermark: "Mostrar marca de agua",
+
+    // Final
+    allSet: "Todo listo!",
+    allSetSubtitle: "Tu sistema esta configurado y listo para usar",
+    enjoyMessage: "Disfruta de EjemplOS",
+  },
+
   // Changelog
   changelog: {
     title: "Novedades - EjemplOS v1.2.1",

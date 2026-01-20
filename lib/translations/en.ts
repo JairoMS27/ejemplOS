@@ -299,6 +299,38 @@ export const en = {
     enterText: "Type...",
   },
 
+  // Setup Wizard
+  setup: {
+    welcome: "Welcome to EjemplOS",
+    welcomeSubtitle: "Let's set up your operating system",
+    letsStart: "Get Started",
+    next: "Next",
+    back: "Back",
+    finish: "Finish",
+    skip: "Skip",
+
+    // Step 1: Language
+    languageTitle: "Choose your language",
+    languageSubtitle: "Select the system language",
+
+    // Step 2: User
+    userTitle: "What's your name?",
+    userSubtitle: "This name will appear on your system",
+    userName: "Your name",
+    userPlaceholder: "Enter your name...",
+
+    // Step 3: Theme
+    themeTitle: "Customize your desktop",
+    themeSubtitle: "Choose how you want it to look",
+    showGrid: "Show grid",
+    showWatermark: "Show watermark",
+
+    // Final
+    allSet: "You're all set!",
+    allSetSubtitle: "Your system is configured and ready to use",
+    enjoyMessage: "Enjoy EjemplOS",
+  },
+
   // Changelog
   changelog: {
     title: "What's New - EjemplOS v1.2.1",
