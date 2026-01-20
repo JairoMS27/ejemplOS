@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Check, ChevronRight, ChevronLeft, User, Languages, Palette, Lock } from "lucide-react"
+import { Check, ChevronRight, ChevronLeft, User, Languages, Palette, Lock, Upload, Image, Paintbrush, Grid3X3 } from "lucide-react"
 import { useSettings } from "@/lib/settings-context"
 import { useI18n } from "@/lib/i18n-context"
 
@@ -17,6 +17,10 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [userName, setUserName] = useState("")
   const [showGrid, setShowGrid] = useState(true)
   const [showWatermark, setShowWatermark] = useState(true)
+  const [wallpaperType, setWallpaperType] = useState<"default" | "solid" | "image">("default")
+  const [wallpaperColor, setWallpaperColor] = useState("#000000")
+  const [wallpaperImageUrl, setWallpaperImageUrl] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [pinEnabled, setPinEnabled] = useState(false)
   const [pin, setPin] = useState("")
   const [confirmPin, setConfirmPin] = useState("")
@@ -25,7 +29,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const pinInputRef = useRef<HTMLInputElement>(null)
   const confirmPinInputRef = useRef<HTMLInputElement>(null)
 
-  const { updateUser, updateDesktop, completeSetup } = useSettings()
+  const { updateUser, updateDesktop, updateWallpaper, completeSetup } = useSettings()
   const { t, language, setLanguage } = useI18n()
 
   // Focus PIN input when enabled
@@ -45,6 +49,26 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       setActivePinField("confirm")
     }
   }, [pin, activePinField])
+
+  // Handle image upload for wallpaper
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const imageUrl = event.target?.result as string
+        setWallpaperImageUrl(imageUrl)
+        setWallpaperType("image")
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Predefined wallpaper colors
+  const presetColors = [
+    "#000000", "#1a1a2e", "#16213e", "#0f3460",
+    "#1e3a5f", "#2d4263", "#3d5a80", "#293241",
+  ]
 
   const steps: Step[] = ["welcome", "language", "user", "theme", "pin", "complete"]
   const currentStepIndex = steps.indexOf(currentStep)
@@ -81,6 +105,11 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       pin: pinEnabled ? pin : "",
     })
     updateDesktop({ showGrid, showWatermark })
+    updateWallpaper({
+      type: wallpaperType,
+      color: wallpaperColor,
+      imageUrl: wallpaperImageUrl,
+    })
     completeSetup()
     onComplete()
   }
@@ -268,7 +297,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         {/* Theme Step */}
         {currentStep === "theme" && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-6 border border-white/20 rounded-xl flex items-center justify-center">
                 <Palette className="w-8 h-8 text-white" />
               </div>
@@ -281,8 +310,25 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             </div>
 
             {/* Preview */}
-            <div className="relative w-full h-40 mb-6 rounded-xl overflow-hidden border border-white/10">
-              <div className="absolute inset-0 bg-black" />
+            <div className="relative w-full h-32 mb-4 rounded-xl overflow-hidden border border-white/10">
+              {/* Wallpaper base */}
+              {wallpaperType === "default" && (
+                <div className="absolute inset-0 bg-black" />
+              )}
+              {wallpaperType === "solid" && (
+                <div className="absolute inset-0" style={{ backgroundColor: wallpaperColor }} />
+              )}
+              {wallpaperType === "image" && wallpaperImageUrl && (
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: `url(${wallpaperImageUrl})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                />
+              )}
+              {/* Grid overlay */}
               {showGrid && (
                 <div
                   className="absolute inset-0 opacity-10"
@@ -295,24 +341,114 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                   }}
                 />
               )}
+              {/* Watermark */}
               {showWatermark && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-6xl font-bold text-white opacity-20">EJ</span>
+                  <span className="text-5xl font-bold text-white opacity-20">EJ</span>
                 </div>
               )}
-              <div className="absolute bottom-2 left-2 right-2 h-4 bg-white/10 rounded" />
+              <div className="absolute bottom-2 left-2 right-2 h-3 bg-white/10 rounded" />
             </div>
 
-            <div className="space-y-3 mb-8">
+            <div className="space-y-4 mb-6 max-h-[280px] overflow-y-auto pr-1">
+              {/* Wallpaper Type Selector */}
+              <div className="space-y-2">
+                <p className="text-sm text-white/60">{t.setup.wallpaperType}</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setWallpaperType("default")}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                      wallpaperType === "default"
+                        ? "bg-white/10 border-white"
+                        : "border-white/10 hover:border-white/30"
+                    }`}
+                  >
+                    <Grid3X3 className="w-5 h-5 text-white" />
+                    <span className="text-xs text-white">{t.setup.wallpaperDefault}</span>
+                  </button>
+                  <button
+                    onClick={() => setWallpaperType("solid")}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                      wallpaperType === "solid"
+                        ? "bg-white/10 border-white"
+                        : "border-white/10 hover:border-white/30"
+                    }`}
+                  >
+                    <Paintbrush className="w-5 h-5 text-white" />
+                    <span className="text-xs text-white">{t.setup.wallpaperColor}</span>
+                  </button>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                      wallpaperType === "image"
+                        ? "bg-white/10 border-white"
+                        : "border-white/10 hover:border-white/30"
+                    }`}
+                  >
+                    <Image className="w-5 h-5 text-white" />
+                    <span className="text-xs text-white">{t.setup.wallpaperImage}</span>
+                  </button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Color Palette (shown when solid color is selected) */}
+              {wallpaperType === "solid" && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <p className="text-sm text-white/60">{t.setup.selectColor}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {presetColors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setWallpaperColor(color)}
+                        className={`w-8 h-8 rounded-lg border-2 transition-all ${
+                          wallpaperColor === color
+                            ? "border-white scale-110"
+                            : "border-transparent hover:border-white/30"
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                    <input
+                      type="color"
+                      value={wallpaperColor}
+                      onChange={(e) => setWallpaperColor(e.target.value)}
+                      className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-white/20"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Image uploaded indicator */}
+              {wallpaperType === "image" && wallpaperImageUrl && (
+                <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg animate-in fade-in duration-200">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-white/60">{t.setup.imageUploaded}</span>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="ml-auto text-xs text-white/40 hover:text-white transition-colors"
+                  >
+                    {t.setup.changeImage}
+                  </button>
+                </div>
+              )}
+
+              {/* Grid Toggle */}
               <button
                 onClick={() => setShowGrid(!showGrid)}
-                className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
                   showGrid
                     ? "bg-white/10 border-white"
                     : "border-white/10 hover:border-white/30"
                 }`}
               >
-                <span className="text-white">{t.setup.showGrid}</span>
+                <span className="text-white text-sm">{t.setup.showGrid}</span>
                 <div
                   className={`w-10 h-6 rounded-full transition-colors ${
                     showGrid ? "bg-white" : "bg-white/20"
@@ -326,15 +462,16 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                 </div>
               </button>
 
+              {/* Watermark Toggle */}
               <button
                 onClick={() => setShowWatermark(!showWatermark)}
-                className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
                   showWatermark
                     ? "bg-white/10 border-white"
                     : "border-white/10 hover:border-white/30"
                 }`}
               >
-                <span className="text-white">{t.setup.showWatermark}</span>
+                <span className="text-white text-sm">{t.setup.showWatermark}</span>
                 <div
                   className={`w-10 h-6 rounded-full transition-colors ${
                     showWatermark ? "bg-white" : "bg-white/20"
