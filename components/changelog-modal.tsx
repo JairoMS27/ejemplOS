@@ -20,57 +20,43 @@ export function ChangelogModal({ onClose }: { onClose: () => void }) {
         {/* Content */}
         <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
           <div>
-            <h3 className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-3">{t.changelog.bugFixes}</h3>
+            <h3 className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-3">{t.changelog.newFeatures}</h3>
             <ul className="space-y-2 text-sm text-zinc-300">
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.bugFixesList.audioStops}</span>
+                <span>{t.changelog.newFeaturesList.setupWizard}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.bugFixesList.windowResize}</span>
+                <span>{t.changelog.newFeaturesList.pinLock}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.bugFixesList.projectsNav}</span>
+                <span>{t.changelog.newFeaturesList.languageSetup}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
+                <span>{t.changelog.newFeaturesList.desktopCustomization}</span>
               </li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-3">
-              {t.changelog.qualityOfLife}
+              {t.changelog.improvements}
             </h3>
             <ul className="space-y-2 text-sm text-zinc-300">
               <li className="flex items-start gap-2">
                 <span className="text-emerald-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.qualityOfLifeList.browserDesktop}</span>
+                <span>{t.changelog.improvementsList.lockScreen}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.qualityOfLifeList.finderSidebar}</span>
+                <span>{t.changelog.improvementsList.welcomeMessage}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.qualityOfLifeList.desktopLocation}</span>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-3">{t.changelog.uiImprovements}</h3>
-            <ul className="space-y-2 text-sm text-zinc-300">
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.uiImprovementsList.navigationPaths}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.uiImprovementsList.selectionDesign}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400 mt-1.5 w-1 h-1 rounded-full bg-current" />
-                <span>{t.changelog.uiImprovementsList.consistentSidebar}</span>
+                <span>{t.changelog.improvementsList.smoothAnimations}</span>
               </li>
             </ul>
           </div>

@@ -82,14 +82,11 @@ export function LockScreen({ onUnlock }: LockScreenProps) {
 
         {/* Welcome message */}
         {settings.user.name && (
-          <p className="text-white/60 text-lg mb-2">
-            {t.lockScreen.welcome}, <span className="text-white font-medium">{settings.user.name}</span>
+          <p className="text-white text-xl font-medium mb-2">
+            {t.lockScreen.welcome}, {settings.user.name}
           </p>
         )}
 
-        <h1 className="text-2xl font-bold text-white mb-2">
-          {t.lockScreen.title}
-        </h1>
         <p className="text-white/40 mb-8">
           {t.lockScreen.subtitle}
         </p>
