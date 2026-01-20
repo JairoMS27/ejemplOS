@@ -322,6 +322,13 @@ export const en = {
     // Step 3: Theme
     themeTitle: "Customize your desktop",
     themeSubtitle: "Choose how you want it to look",
+    wallpaperType: "Desktop wallpaper",
+    wallpaperDefault: "Default",
+    wallpaperColor: "Color",
+    wallpaperImage: "Image",
+    selectColor: "Select a color",
+    imageUploaded: "Image uploaded",
+    changeImage: "Change",
     showGrid: "Show grid",
     showWatermark: "Show watermark",
 

@@ -322,6 +322,13 @@ export const es = {
     // Step 3: Theme
     themeTitle: "Personaliza tu escritorio",
     themeSubtitle: "Elige como quieres que se vea",
+    wallpaperType: "Fondo de escritorio",
+    wallpaperDefault: "Por defecto",
+    wallpaperColor: "Color",
+    wallpaperImage: "Imagen",
+    selectColor: "Selecciona un color",
+    imageUploaded: "Imagen cargada",
+    changeImage: "Cambiar",
     showGrid: "Mostrar cuadricula",
     showWatermark: "Mostrar marca de agua",
 
