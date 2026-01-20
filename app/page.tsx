@@ -7,6 +7,7 @@ import { WindowManager } from "@/components/window-manager"
 import { BootScreen } from "@/components/boot-screen"
 import { ChangelogModal } from "@/components/changelog-modal"
 import { SetupWizard } from "@/components/setup-wizard"
+import { LockScreen } from "@/components/lock-screen"
 import { AudioProvider } from "@/lib/audio-context"
 import { SettingsProvider, useSettings } from "@/lib/settings-context"
 import { I18nProvider, useI18n } from "@/lib/i18n-context"
@@ -82,6 +83,7 @@ function HomeContent() {
   const { settings } = useSettings()
   const [booted, setBooted] = useState(false)
   const [showSetup, setShowSetup] = useState(false)
+  const [showLockScreen, setShowLockScreen] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [openWindows, setOpenWindows] = useState<
     Array<{
@@ -105,15 +107,19 @@ function HomeContent() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setBooted(true)
-      // Show setup wizard if not completed, otherwise show changelog
+      // Show setup wizard if not completed
       if (!settings.user.setupCompleted) {
         setShowSetup(true)
+      } else if (settings.user.pinEnabled) {
+        // Show lock screen if PIN is enabled
+        setShowLockScreen(true)
       } else {
+        // No PIN, go straight to desktop
         setShowChangelog(true)
       }
     }, 2000)
     return () => clearTimeout(timer)
-  }, [settings.user.setupCompleted])
+  }, [settings.user.setupCompleted, settings.user.pinEnabled])
 
   const getWindowTitle = (type: string) => {
     const titles: Record<string, string> = {
@@ -266,12 +272,21 @@ function HomeContent() {
     setShowChangelog(true)
   }
 
+  const handleUnlock = () => {
+    setShowLockScreen(false)
+    setShowChangelog(true)
+  }
+
   if (!booted) {
     return <BootScreen />
   }
 
   if (showSetup) {
     return <SetupWizard onComplete={handleSetupComplete} />
+  }
+
+  if (showLockScreen) {
+    return <LockScreen onUnlock={handleUnlock} />
   }
 
   return (

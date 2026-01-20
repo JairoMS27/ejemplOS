@@ -21,6 +21,8 @@ export interface DesktopSettings {
 export interface UserSettings {
   name: string
   setupCompleted: boolean
+  pinEnabled: boolean
+  pin: string
 }
 
 export interface SystemSettings {
@@ -38,6 +40,7 @@ interface SettingsContextType {
   updateSettings: (newSettings: Partial<SystemSettings>) => void
   updateUser: (user: Partial<UserSettings>) => void
   completeSetup: () => void
+  verifyPin: (pin: string) => boolean
   resetSettings: () => void
   getStorageUsage: () => { used: number; items: number }
   clearStorage: () => void
@@ -62,6 +65,8 @@ const defaultSettings: SystemSettings = {
   user: {
     name: "",
     setupCompleted: false,
+    pinEnabled: false,
+    pin: "",
   },
 }
 
@@ -130,6 +135,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }))
   }, [])
 
+  const verifyPin = useCallback((pin: string) => {
+    return settings.user.pin === pin
+  }, [settings.user.pin])
+
   const resetSettings = useCallback(() => {
     setSettings(defaultSettings)
   }, [])
@@ -170,6 +179,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         updateSettings,
         updateUser,
         completeSetup,
+        verifyPin,
         resetSettings,
         getStorageUsage,
         clearStorage,

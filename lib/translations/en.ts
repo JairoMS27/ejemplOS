@@ -325,10 +325,29 @@ export const en = {
     showGrid: "Show grid",
     showWatermark: "Show watermark",
 
+    // Step 4: PIN
+    pinTitle: "Secure your system",
+    pinSubtitle: "Set a PIN to protect your data",
+    enablePin: "Enable PIN lock",
+    pinLabel: "Enter a 4-digit PIN",
+    pinPlaceholder: "0000",
+    confirmPinLabel: "Confirm your PIN",
+    pinMismatch: "PINs don't match",
+    pinOptional: "This step is optional",
+
     // Final
     allSet: "You're all set!",
     allSetSubtitle: "Your system is configured and ready to use",
     enjoyMessage: "Enjoy EjemplOS",
+  },
+
+  // Lock Screen
+  lockScreen: {
+    title: "EjemplOS",
+    subtitle: "Enter your PIN to unlock",
+    unlock: "Unlock",
+    wrongPin: "Incorrect PIN",
+    welcome: "Welcome back",
   },
 
   // Changelog
