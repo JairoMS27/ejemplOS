@@ -6,6 +6,7 @@ import { TaskBar } from "@/components/taskbar"
 import { WindowManager } from "@/components/window-manager"
 import { BootScreen } from "@/components/boot-screen"
 import { ChangelogModal } from "@/components/changelog-modal"
+import { SetupWizard } from "@/components/setup-wizard"
 import { AudioProvider } from "@/lib/audio-context"
 import { SettingsProvider, useSettings } from "@/lib/settings-context"
 import { I18nProvider, useI18n } from "@/lib/i18n-context"
@@ -78,7 +79,9 @@ function DesktopBackground() {
 
 function HomeContent() {
   const { t } = useI18n()
+  const { settings } = useSettings()
   const [booted, setBooted] = useState(false)
+  const [showSetup, setShowSetup] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [openWindows, setOpenWindows] = useState<
     Array<{
@@ -102,10 +105,15 @@ function HomeContent() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setBooted(true)
-      setShowChangelog(true)
+      // Show setup wizard if not completed, otherwise show changelog
+      if (!settings.user.setupCompleted) {
+        setShowSetup(true)
+      } else {
+        setShowChangelog(true)
+      }
     }, 2000)
     return () => clearTimeout(timer)
-  }, [])
+  }, [settings.user.setupCompleted])
 
   const getWindowTitle = (type: string) => {
     const titles: Record<string, string> = {
@@ -253,8 +261,17 @@ function HomeContent() {
 
   const minimizedWindows = openWindows.filter((w) => w.isMinimized).map((w) => ({ id: w.id, title: w.title }))
 
+  const handleSetupComplete = () => {
+    setShowSetup(false)
+    setShowChangelog(true)
+  }
+
   if (!booted) {
     return <BootScreen />
+  }
+
+  if (showSetup) {
+    return <SetupWizard onComplete={handleSetupComplete} />
   }
 
   return (

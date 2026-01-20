@@ -335,7 +335,7 @@ export function TaskBar({ onAppClick, minimizedWindows = [], onRestoreWindow }: 
             </div>
             <div className="border-t border-white/10 pt-3 text-xs text-white/60">
               <p>{t.taskbar.version} 1.2.1</p>
-              <p className="mt-1">© 2025 EjemplOS. {t.taskbar.allRightsReserved}</p>
+              <p className="mt-1">© 2026 EjemplOS. {t.taskbar.allRightsReserved}</p>
             </div>
           </div>
         </div>
