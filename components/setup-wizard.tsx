@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Check, ChevronRight, ChevronLeft, User, Languages, Palette, Lock } from "lucide-react"
 import { useSettings } from "@/lib/settings-context"
 import { useI18n } from "@/lib/i18n-context"
@@ -10,6 +10,7 @@ interface SetupWizardProps {
 }
 
 type Step = "welcome" | "language" | "user" | "theme" | "pin" | "complete"
+type PinField = "pin" | "confirm"
 
 export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [currentStep, setCurrentStep] = useState<Step>("welcome")
@@ -20,9 +21,30 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [pin, setPin] = useState("")
   const [confirmPin, setConfirmPin] = useState("")
   const [pinError, setPinError] = useState(false)
+  const [activePinField, setActivePinField] = useState<PinField>("pin")
+  const pinInputRef = useRef<HTMLInputElement>(null)
+  const confirmPinInputRef = useRef<HTMLInputElement>(null)
 
   const { updateUser, updateDesktop, completeSetup } = useSettings()
   const { t, language, setLanguage } = useI18n()
+
+  // Focus PIN input when enabled
+  useEffect(() => {
+    if (pinEnabled && currentStep === "pin") {
+      if (activePinField === "pin") {
+        pinInputRef.current?.focus()
+      } else {
+        confirmPinInputRef.current?.focus()
+      }
+    }
+  }, [pinEnabled, currentStep, activePinField])
+
+  // Auto-switch to confirm field when first PIN is complete
+  useEffect(() => {
+    if (pin.length === 4 && activePinField === "pin") {
+      setActivePinField("confirm")
+    }
+  }, [pin, activePinField])
 
   const steps: Step[] = ["welcome", "language", "user", "theme", "pin", "complete"]
   const currentStepIndex = steps.indexOf(currentStep)
@@ -394,13 +416,41 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
               {/* PIN inputs */}
               {pinEnabled && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* PIN Field */}
                   <div>
-                    <label className="block text-sm text-white/40 mb-2">
+                    <label className="block text-sm text-white/40 mb-3 text-center">
                       {t.setup.pinLabel}
                     </label>
+                    <button
+                      onClick={() => {
+                        setActivePinField("pin")
+                        pinInputRef.current?.focus()
+                      }}
+                      className={`w-full p-4 rounded-xl border-2 transition-all ${
+                        activePinField === "pin"
+                          ? "border-white bg-white/5"
+                          : "border-white/10 hover:border-white/30"
+                      }`}
+                    >
+                      <div className="flex justify-center gap-4">
+                        {[0, 1, 2, 3].map((index) => (
+                          <div
+                            key={index}
+                            className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
+                              pin.length > index
+                                ? "bg-white border-white"
+                                : activePinField === "pin"
+                                  ? "border-white/50"
+                                  : "border-white/20"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </button>
                     <input
-                      type="password"
+                      ref={pinInputRef}
+                      type="text"
                       inputMode="numeric"
                       maxLength={4}
                       value={pin}
@@ -409,16 +459,52 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                         setPin(value)
                         setPinError(false)
                       }}
-                      placeholder={t.setup.pinPlaceholder}
-                      className="w-full px-4 py-4 bg-white/5 border-2 border-white/10 rounded-xl text-white text-center text-2xl tracking-[1em] placeholder-white/30 focus:outline-none focus:border-white/40 transition-colors font-mono"
+                      onFocus={() => setActivePinField("pin")}
+                      className="sr-only"
+                      autoComplete="off"
                     />
                   </div>
+
+                  {/* Confirm PIN Field */}
                   <div>
-                    <label className="block text-sm text-white/40 mb-2">
+                    <label className="block text-sm text-white/40 mb-3 text-center">
                       {t.setup.confirmPinLabel}
                     </label>
+                    <button
+                      onClick={() => {
+                        setActivePinField("confirm")
+                        confirmPinInputRef.current?.focus()
+                      }}
+                      className={`w-full p-4 rounded-xl border-2 transition-all ${
+                        activePinField === "confirm"
+                          ? pinError
+                            ? "border-red-500 bg-red-500/5"
+                            : "border-white bg-white/5"
+                          : pinError
+                            ? "border-red-500/50"
+                            : "border-white/10 hover:border-white/30"
+                      }`}
+                    >
+                      <div className="flex justify-center gap-4">
+                        {[0, 1, 2, 3].map((index) => (
+                          <div
+                            key={index}
+                            className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
+                              confirmPin.length > index
+                                ? pinError
+                                  ? "bg-red-500 border-red-500"
+                                  : "bg-white border-white"
+                                : activePinField === "confirm"
+                                  ? "border-white/50"
+                                  : "border-white/20"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </button>
                     <input
-                      type="password"
+                      ref={confirmPinInputRef}
+                      type="text"
                       inputMode="numeric"
                       maxLength={4}
                       value={confirmPin}
@@ -427,17 +513,56 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                         setConfirmPin(value)
                         setPinError(false)
                       }}
-                      placeholder={t.setup.pinPlaceholder}
-                      className={`w-full px-4 py-4 bg-white/5 border-2 rounded-xl text-white text-center text-2xl tracking-[1em] placeholder-white/30 focus:outline-none transition-colors font-mono ${
-                        pinError ? "border-red-500" : "border-white/10 focus:border-white/40"
-                      }`}
+                      onFocus={() => setActivePinField("confirm")}
+                      className="sr-only"
+                      autoComplete="off"
                     />
                   </div>
+
                   {pinError && (
                     <p className="text-red-400 text-sm text-center animate-in fade-in duration-200">
                       {t.setup.pinMismatch}
                     </p>
                   )}
+
+                  {/* Numeric keypad */}
+                  <div className="grid grid-cols-3 gap-2 max-w-[200px] mx-auto">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, null, 0, "del"].map((key, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          if (key === null) return
+                          const currentValue = activePinField === "pin" ? pin : confirmPin
+                          const setValue = activePinField === "pin" ? setPin : setConfirmPin
+
+                          if (key === "del") {
+                            setValue(currentValue.slice(0, -1))
+                            setPinError(false)
+                          } else if (currentValue.length < 4) {
+                            setValue(currentValue + key)
+                            setPinError(false)
+                          }
+                        }}
+                        disabled={key === null}
+                        className={`h-12 rounded-lg text-lg font-medium transition-all ${
+                          key === null
+                            ? "invisible"
+                            : key === "del"
+                              ? "bg-white/5 text-white/60 hover:bg-white/10"
+                              : "bg-white/10 text-white hover:bg-white/20 active:scale-95"
+                        }`}
+                      >
+                        {key === "del" ? (
+                          <svg className="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
+                          </svg>
+                        ) : (
+                          key
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
