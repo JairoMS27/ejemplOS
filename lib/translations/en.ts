@@ -82,7 +82,7 @@ export const en = {
 
   // Boot screen
   boot: {
-    starting: "Starting EjemplOS v1.2.1...",
+    starting: "Starting EjemplOS v1.3...",
     loadingKernel: "Loading kernel...",
     checkingFilesystem: "Checking file system...",
     mountingVolumes: "Mounting volumes...",
@@ -352,24 +352,19 @@ export const en = {
 
   // Changelog
   changelog: {
-    title: "What's New - EjemplOS v1.2.1",
-    bugFixes: "Bug Fixes",
-    bugFixesList: {
-      audioStops: "Audio now stops correctly when closing the music window",
-      windowResize: "Fixed window resizing from edges",
-      projectsNav: "Improved navigation in My Projects folder",
+    title: "What's New - EjemplOS v1.3",
+    newFeatures: "New Features",
+    newFeaturesList: {
+      setupWizard: "Initial setup wizard for first-time configuration",
+      pinLock: "Optional PIN lock to protect your system",
+      languageSetup: "Language selection during initial setup",
+      desktopCustomization: "Customize grid and watermark in setup",
     },
-    qualityOfLife: "Quality of Life Improvements",
-    qualityOfLifeList: {
-      browserDesktop: "Browser now available on desktop",
-      finderSidebar: "Finder sidebar updated with all applications",
-      desktopLocation: "Desktop visible in Finder locations",
-    },
-    uiImprovements: "UI Improvements",
-    uiImprovementsList: {
-      navigationPaths: "Clearer navigation paths in folders",
-      selectionDesign: "Simplified selection design in My Projects",
-      consistentSidebar: "Consistent sidebar between applications",
+    improvements: "Improvements",
+    improvementsList: {
+      lockScreen: "Beautiful lock screen with numeric keypad",
+      welcomeMessage: "Personalized welcome message with your name",
+      smoothAnimations: "Smooth transitions between setup steps",
     },
     understood: "Got it",
   },

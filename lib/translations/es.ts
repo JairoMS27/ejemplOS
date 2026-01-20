@@ -82,7 +82,7 @@ export const es = {
 
   // Boot screen
   boot: {
-    starting: "Iniciando EjemplOS v1.2.1...",
+    starting: "Iniciando EjemplOS v1.3...",
     loadingKernel: "Cargando kernel...",
     checkingFilesystem: "Verificando sistema de archivos...",
     mountingVolumes: "Montando volumenes...",
@@ -352,24 +352,19 @@ export const es = {
 
   // Changelog
   changelog: {
-    title: "Novedades - EjemplOS v1.2.1",
-    bugFixes: "Correcciones de Bugs",
-    bugFixesList: {
-      audioStops: "El audio ahora se detiene correctamente al cerrar la ventana de musica",
-      windowResize: "Corregido el redimensionamiento de ventanas desde los bordes",
-      projectsNav: "Mejorada la navegacion en la carpeta Mis Proyectos",
+    title: "Novedades - EjemplOS v1.3",
+    newFeatures: "Nuevas Funcionalidades",
+    newFeaturesList: {
+      setupWizard: "Asistente de configuracion inicial para nuevos usuarios",
+      pinLock: "Bloqueo con PIN opcional para proteger tu sistema",
+      languageSetup: "Seleccion de idioma durante la configuracion inicial",
+      desktopCustomization: "Personaliza cuadricula y marca de agua en el setup",
     },
-    qualityOfLife: "Mejoras de Calidad de Vida",
-    qualityOfLifeList: {
-      browserDesktop: "Navegador ahora disponible en el escritorio",
-      finderSidebar: "Sidebar del Finder actualizado con todas las aplicaciones",
-      desktopLocation: "Escritorio visible en ubicaciones del Finder",
-    },
-    uiImprovements: "Mejoras de Interfaz",
-    uiImprovementsList: {
-      navigationPaths: "Rutas de navegacion mas claras en carpetas",
-      selectionDesign: "Diseno de seleccion simplificado en Mis Proyectos",
-      consistentSidebar: "Sidebar consistente entre aplicaciones",
+    improvements: "Mejoras",
+    improvementsList: {
+      lockScreen: "Pantalla de bloqueo elegante con teclado numerico",
+      welcomeMessage: "Mensaje de bienvenida personalizado con tu nombre",
+      smoothAnimations: "Transiciones suaves entre los pasos de configuracion",
     },
     understood: "Entendido",
   },
