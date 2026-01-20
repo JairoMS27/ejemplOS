@@ -104,7 +104,7 @@ export function GamesFolder({ onOpenGame, isMaximized }: GamesFolderProps) {
               >
                 <div className="relative p-2">
                   <game.Icon
-                    className={`w-12 h-12 ${selectedGame === game.id ? "text-white" : "text-zinc-300 group-hover:text-white"} transition-colors`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 ${selectedGame === game.id ? "text-white" : "text-zinc-300 group-hover:text-white"} transition-colors`}
                   />
                 </div>
                 <div className="flex flex-col items-center text-center w-full">

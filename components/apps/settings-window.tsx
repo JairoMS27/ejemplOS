@@ -17,12 +17,15 @@ import {
   Check,
   Sparkles,
   Languages,
+  Lock,
+  Shield,
+  KeyRound,
 } from "lucide-react"
 import { useSettings } from "@/lib/settings-context"
 import { useAudio } from "@/lib/audio-context"
 import { useI18n } from "@/lib/i18n-context"
 
-type SettingsTab = "personalization" | "display" | "sound" | "storage" | "language" | "about"
+type SettingsTab = "personalization" | "display" | "sound" | "storage" | "security" | "language" | "about"
 
 interface SettingsWindowProps {
   isMaximized?: boolean
@@ -103,13 +106,21 @@ const presetColors = [
 
 export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("personalization")
-  const { settings, updateWallpaper, updateDesktop, updateSettings, resetSettings, getStorageUsage, clearStorage } = useSettings()
+  const { settings, updateWallpaper, updateDesktop, updateSettings, updateUser, resetSettings, getStorageUsage, clearStorage } = useSettings()
   const audio = useAudio()
   const { t, language, setLanguage } = useI18n()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [storageInfo, setStorageInfo] = useState({ used: 0, items: 0 })
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
+
+  // Security PIN states
+  const [showChangePinModal, setShowChangePinModal] = useState(false)
+  const [showDisablePinModal, setShowDisablePinModal] = useState(false)
+  const [currentPin, setCurrentPin] = useState("")
+  const [newPin, setNewPin] = useState("")
+  const [confirmPin, setConfirmPin] = useState("")
+  const [pinError, setPinError] = useState("")
 
   useEffect(() => {
     setStorageInfo(getStorageUsage())
@@ -140,6 +151,7 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
     { id: "display", label: t.settings.tabs.display, icon: <Monitor className="w-4 h-4" /> },
     { id: "sound", label: t.settings.tabs.sound, icon: <Volume2 className="w-4 h-4" /> },
     { id: "storage", label: t.settings.tabs.storage, icon: <HardDrive className="w-4 h-4" /> },
+    { id: "security", label: t.settings.tabs.security, icon: <Shield className="w-4 h-4" /> },
     { id: "language", label: t.settings.tabs.language, icon: <Languages className="w-4 h-4" /> },
     { id: "about", label: t.settings.tabs.about, icon: <Info className="w-4 h-4" /> },
   ]
@@ -571,6 +583,105 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
           </div>
         )}
 
+        {/* Security Tab */}
+        {activeTab === "security" && (
+          <div className="space-y-6 max-w-2xl">
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-1">{t.settings.security.title}</h2>
+              <p className="text-sm text-zinc-500">{t.settings.security.subtitle}</p>
+            </div>
+
+            <SettingsCard title={t.settings.security.pinLock} description={t.settings.security.pinLockDesc}>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${settings.user.pinEnabled ? "bg-green-500/20" : "bg-zinc-800"}`}>
+                      <Lock className={`w-5 h-5 ${settings.user.pinEnabled ? "text-green-400" : "text-zinc-500"}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-white">{t.settings.security.pinStatus}</p>
+                      <p className="text-xs text-zinc-500">
+                        {settings.user.pinEnabled ? t.settings.security.pinEnabled : t.settings.security.pinDisabled}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${
+                    settings.user.pinEnabled
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-zinc-800 text-zinc-500"
+                  }`}>
+                    {settings.user.pinEnabled ? t.settings.security.active : t.settings.security.inactive}
+                  </div>
+                </div>
+
+                {settings.user.pinEnabled ? (
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-white/10">
+                    <button
+                      onClick={() => {
+                        setShowChangePinModal(true)
+                        setCurrentPin("")
+                        setNewPin("")
+                        setConfirmPin("")
+                        setPinError("")
+                      }}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-sm flex-1"
+                    >
+                      <KeyRound className="w-4 h-4" />
+                      <span>{t.settings.security.changePin}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowDisablePinModal(true)
+                        setCurrentPin("")
+                        setPinError("")
+                      }}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors text-sm border border-red-600/30 flex-1"
+                    >
+                      <Lock className="w-4 h-4" />
+                      <span>{t.settings.security.disablePin}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pt-2 border-t border-white/10">
+                    <button
+                      onClick={() => {
+                        setShowChangePinModal(true)
+                        setCurrentPin("")
+                        setNewPin("")
+                        setConfirmPin("")
+                        setPinError("")
+                      }}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-sm w-full sm:w-auto"
+                    >
+                      <Lock className="w-4 h-4" />
+                      <span>{t.settings.security.enablePin}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </SettingsCard>
+
+            <SettingsCard title={t.settings.security.securityInfo} description="">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-white/5 rounded-lg">
+                  <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-white">{t.settings.security.whatIsPinTitle}</p>
+                    <p className="text-xs text-zinc-400 mt-1">{t.settings.security.whatIsPinDesc}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 bg-white/5 rounded-lg">
+                  <Info className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-white">{t.settings.security.noteTitle}</p>
+                    <p className="text-xs text-zinc-400 mt-1">{t.settings.security.noteDesc}</p>
+                  </div>
+                </div>
+              </div>
+            </SettingsCard>
+          </div>
+        )}
+
         {/* Language Tab */}
         {activeTab === "language" && (
           <div className="space-y-6 max-w-2xl">
@@ -611,7 +722,7 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
                     <span className="text-2xl">🇪🇸</span>
                     <div className="text-left">
                       <p className="text-sm font-medium">{t.settings.language.spanish}</p>
-                      <p className="text-xs text-zinc-500">Espanol</p>
+                      <p className="text-xs text-zinc-500">Español</p>
                     </div>
                   </div>
                   {language === "es" && <Check className="w-5 h-5 text-blue-500" />}
@@ -743,6 +854,166 @@ export function SettingsWindow({ isMaximized }: SettingsWindowProps) {
                 className="px-4 py-2 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
               >
                 {t.settings.modals.clear}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change/Enable PIN Modal */}
+      {showChangePinModal && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-zinc-900 border border-white/10 rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
+            <h3 className="text-lg font-semibold text-white mb-2">
+              {settings.user.pinEnabled ? t.settings.security.changePinTitle : t.settings.security.enablePinTitle}
+            </h3>
+            <p className="text-sm text-zinc-400 mb-4">
+              {settings.user.pinEnabled ? t.settings.security.changePinDesc : t.settings.security.enablePinDesc}
+            </p>
+
+            <div className="space-y-4">
+              {settings.user.pinEnabled && (
+                <div>
+                  <label className="text-xs text-zinc-400 block mb-1.5">{t.settings.security.currentPin}</label>
+                  <input
+                    type="password"
+                    maxLength={4}
+                    value={currentPin}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "")
+                      setCurrentPin(value)
+                      setPinError("")
+                    }}
+                    className="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-white text-center text-lg tracking-[0.5em] focus:outline-none focus:border-blue-500"
+                    placeholder="••••"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs text-zinc-400 block mb-1.5">{t.settings.security.newPin}</label>
+                <input
+                  type="password"
+                  maxLength={4}
+                  value={newPin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "")
+                    setNewPin(value)
+                    setPinError("")
+                  }}
+                  className="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-white text-center text-lg tracking-[0.5em] focus:outline-none focus:border-blue-500"
+                  placeholder="••••"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-zinc-400 block mb-1.5">{t.settings.security.confirmNewPin}</label>
+                <input
+                  type="password"
+                  maxLength={4}
+                  value={confirmPin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "")
+                    setConfirmPin(value)
+                    setPinError("")
+                  }}
+                  className="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-white text-center text-lg tracking-[0.5em] focus:outline-none focus:border-blue-500"
+                  placeholder="••••"
+                />
+              </div>
+
+              {pinError && (
+                <p className="text-sm text-red-400 text-center">{pinError}</p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => setShowChangePinModal(false)}
+                className="px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                {t.common.cancel}
+              </button>
+              <button
+                onClick={() => {
+                  // Validate current PIN if changing
+                  if (settings.user.pinEnabled && currentPin !== settings.user.pin) {
+                    setPinError(t.settings.security.wrongCurrentPin)
+                    return
+                  }
+                  // Validate new PIN
+                  if (newPin.length !== 4) {
+                    setPinError(t.settings.security.pinMustBe4Digits)
+                    return
+                  }
+                  // Validate confirmation
+                  if (newPin !== confirmPin) {
+                    setPinError(t.settings.security.pinsDoNotMatch)
+                    return
+                  }
+                  // Update PIN
+                  updateUser({ pin: newPin, pinEnabled: true })
+                  setShowChangePinModal(false)
+                }}
+                className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+              >
+                {t.common.save}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Disable PIN Modal */}
+      {showDisablePinModal && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-zinc-900 border border-white/10 rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
+            <h3 className="text-lg font-semibold text-white mb-2">{t.settings.security.disablePinTitle}</h3>
+            <p className="text-sm text-zinc-400 mb-4">
+              {t.settings.security.disablePinDesc}
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-zinc-400 block mb-1.5">{t.settings.security.enterCurrentPin}</label>
+                <input
+                  type="password"
+                  maxLength={4}
+                  value={currentPin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "")
+                    setCurrentPin(value)
+                    setPinError("")
+                  }}
+                  className="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-white text-center text-lg tracking-[0.5em] focus:outline-none focus:border-blue-500"
+                  placeholder="••••"
+                />
+              </div>
+
+              {pinError && (
+                <p className="text-sm text-red-400 text-center">{pinError}</p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => setShowDisablePinModal(false)}
+                className="px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                {t.common.cancel}
+              </button>
+              <button
+                onClick={() => {
+                  if (currentPin !== settings.user.pin) {
+                    setPinError(t.settings.security.wrongCurrentPin)
+                    return
+                  }
+                  updateUser({ pin: "", pinEnabled: false })
+                  setShowDisablePinModal(false)
+                }}
+                className="px-4 py-2 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
+              >
+                {t.settings.security.disable}
               </button>
             </div>
           </div>
