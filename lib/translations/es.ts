@@ -102,6 +102,7 @@ export const es = {
       display: "Pantalla",
       sound: "Sonido",
       storage: "Almacenamiento",
+      security: "Seguridad",
       about: "Acerca de",
       language: "Idioma",
     },
@@ -203,6 +204,41 @@ export const es = {
       copyright: "EjemplOS. Todos los derechos reservados.",
     },
 
+    // Security
+    security: {
+      title: "Seguridad",
+      subtitle: "Configura las opciones de seguridad del sistema",
+      pinLock: "Bloqueo con PIN",
+      pinLockDesc: "Protege tu sistema con un codigo PIN de 4 digitos",
+      pinStatus: "Estado del PIN",
+      pinEnabled: "PIN activado",
+      pinDisabled: "PIN desactivado",
+      active: "Activo",
+      inactive: "Inactivo",
+      changePin: "Cambiar PIN",
+      disablePin: "Desactivar PIN",
+      enablePin: "Activar PIN",
+      securityInfo: "Informacion de seguridad",
+      whatIsPinTitle: "Que es el PIN?",
+      whatIsPinDesc: "El PIN es un codigo de 4 digitos que se te pedira cada vez que inicies EjemplOS para proteger tu sesion.",
+      noteTitle: "Nota importante",
+      noteDesc: "El PIN se guarda localmente en tu navegador. Si borras los datos del navegador, perderas la configuracion del PIN.",
+      changePinTitle: "Cambiar PIN",
+      changePinDesc: "Introduce tu PIN actual y el nuevo PIN que deseas establecer.",
+      enablePinTitle: "Activar PIN",
+      enablePinDesc: "Introduce un PIN de 4 digitos para proteger tu sistema.",
+      currentPin: "PIN actual",
+      newPin: "Nuevo PIN",
+      confirmNewPin: "Confirmar nuevo PIN",
+      wrongCurrentPin: "El PIN actual es incorrecto",
+      pinMustBe4Digits: "El PIN debe tener 4 digitos",
+      pinsDoNotMatch: "Los PIN no coinciden",
+      disablePinTitle: "Desactivar PIN",
+      disablePinDesc: "Introduce tu PIN actual para desactivar el bloqueo.",
+      enterCurrentPin: "Introduce tu PIN actual",
+      disable: "Desactivar",
+    },
+
     // Language
     language: {
       title: "Idioma",
@@ -210,7 +246,7 @@ export const es = {
       selectLanguage: "Idioma del sistema",
       selectLanguageDesc: "Selecciona tu idioma preferido",
       english: "Ingles",
-      spanish: "Espanol",
+      spanish: "Español",
     },
 
     // Modals

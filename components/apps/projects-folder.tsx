@@ -320,13 +320,13 @@ export function ProjectsFolder({ onOpenProject, onOpenFinder, onOpenApp, isMaxim
                   }`}
                 >
                   <div className="relative">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all ${
                       selectedProject === project.id
                         ? "bg-zinc-700/50"
                         : "bg-zinc-800/50 group-hover:bg-zinc-700/50"
                     }`}>
                       <project.Icon
-                        className={`w-7 h-7 ${selectedProject === project.id ? "text-white" : "text-zinc-300 group-hover:text-white"} transition-colors`}
+                        className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 ${selectedProject === project.id ? "text-white" : "text-zinc-300 group-hover:text-white"} transition-colors`}
                       />
                     </div>
                   </div>
